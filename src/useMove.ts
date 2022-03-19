@@ -4,23 +4,23 @@ import { useMemo, useRef } from 'react';
 interface PartialPointerEvent<E extends Element = Element>
   extends Pick<React.PointerEvent<E>, 'pointerId' | 'screenX' | 'screenY'> {}
 
-interface MoveData {
+export interface MoveData {
   movementX: number;
   movementY: number;
 }
 
-type MoveEventHandler<E extends Element = Element> = (
+export type MoveEventHandler<E extends Element = Element> = (
   evt: React.PointerEvent<E>,
   data: Readonly<MoveData>
 ) => void;
 
-type MoveStopButtonHandler<E extends Element = Element> = (
+export type MoveStopButtonHandler<E extends Element = Element> = (
   button: React.PointerEvent<E>['button']
 ) => boolean;
 
-type MoveStopHandler<E extends Element = Element> = (evt: React.PointerEvent<E>) => boolean;
+export type MoveStopHandler<E extends Element = Element> = (evt: React.PointerEvent<E>) => boolean;
 
-type MoveNoticeEventHandler<E extends Element = Element> = React.PointerEventHandler<E>;
+export type MoveNoticeEventHandler<E extends Element = Element> = React.PointerEventHandler<E>;
 
 export interface MoveOptions<E extends Element = Element> {
   onMoveStart?: MoveEventHandler<E>;
@@ -36,7 +36,7 @@ export interface MoveOptions<E extends Element = Element> {
   moveFinish?: MoveNoticeEventHandler<E>;
 }
 
-interface MoveProps<E extends Element = Element> {
+export interface MoveProps<E extends Element = Element> {
   onPointerDown?: React.PointerEventHandler<E>;
   onPointerMoveCapture?: React.PointerEventHandler<E>;
   onPointerMove?: React.PointerEventHandler<E>;

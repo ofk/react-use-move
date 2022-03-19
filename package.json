@@ -5,7 +5,11 @@
   "description": "",
   "license": "UNLICENSED",
   "author": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig.build.json",
@@ -17,10 +21,12 @@
     "lint:scripts": "eslint --ext .js,.jsx,.ts,.tsx .",
     "lint:typecheck": "tsc",
     "prepare": "husky install",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "prettier:format": "npm run prettier:lint -- --write",
     "prettier:lint": "prettier . --check"
   },
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@ofk/eslint-config-recommend": "^5.2.1",
     "@types/jest": "^27.4.1",

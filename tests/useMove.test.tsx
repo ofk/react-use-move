@@ -299,8 +299,8 @@ describe('useMove with move and pure move options', () => {
         onMoveStart={addResult('start')}
         onMove={addResult('move')}
         onMoveEnd={addResult('end')}
-        onTraceMove={addResult('idle', false)}
-        onTraceMoveCapture={addResult('idle-cap', false)}
+        onTraceMove={addResult('trace', false)}
+        onTraceMoveCapture={addResult('trace-cap', false)}
       >
         drag
       </MoveTest>
@@ -317,12 +317,12 @@ describe('useMove with move and pure move options', () => {
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
     expect(results).toStrictEqual([
       { name: 'prepare', type: 'pointerdown' },
-      { name: 'idle-cap', type: 'pointermove', movementX: 0, movementY: 0 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 0, movementY: 0 },
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
-      { name: 'idle', type: 'pointermove', movementX: 0, movementY: 0 },
-      { name: 'idle-cap', type: 'pointermove', movementX: 5, movementY: -5 },
+      { name: 'trace', type: 'pointermove', movementX: 0, movementY: 0 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 5, movementY: -5 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
-      { name: 'idle', type: 'pointermove', movementX: 5, movementY: -5 },
+      { name: 'trace', type: 'pointermove', movementX: 5, movementY: -5 },
       { name: 'finish', type: 'pointerup' },
       { name: 'end', type: 'pointerup', movementX: 0, movementY: 0 },
     ]);
@@ -336,10 +336,10 @@ describe('useMove with move and pure move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
     expect(results).toStrictEqual([
-      { name: 'idle-cap', type: 'pointermove', movementX: 0, movementY: 0 },
-      { name: 'idle', type: 'pointermove', movementX: 0, movementY: 0 },
-      { name: 'idle-cap', type: 'pointermove', movementX: 5, movementY: -5 },
-      { name: 'idle', type: 'pointermove', movementX: 5, movementY: -5 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 0, movementY: 0 },
+      { name: 'trace', type: 'pointermove', movementX: 0, movementY: 0 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 5, movementY: -5 },
+      { name: 'trace', type: 'pointermove', movementX: 5, movementY: -5 },
     ]);
   });
 
@@ -350,12 +350,12 @@ describe('useMove with move and pure move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     expect(results).toStrictEqual([
-      { name: 'idle-cap', type: 'pointermove', movementX: 0, movementY: 0 },
-      { name: 'idle', type: 'pointermove', movementX: 0, movementY: 0 },
-      { name: 'idle-cap', type: 'pointermove', movementX: 10, movementY: -10 },
-      { name: 'idle', type: 'pointermove', movementX: 10, movementY: -10 },
-      { name: 'idle-cap', type: 'pointermove', movementX: 5, movementY: -5 },
-      { name: 'idle', type: 'pointermove', movementX: 5, movementY: -5 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 0, movementY: 0 },
+      { name: 'trace', type: 'pointermove', movementX: 0, movementY: 0 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 10, movementY: -10 },
+      { name: 'trace', type: 'pointermove', movementX: 10, movementY: -10 },
+      { name: 'trace-cap', type: 'pointermove', movementX: 5, movementY: -5 },
+      { name: 'trace', type: 'pointermove', movementX: 5, movementY: -5 },
     ]);
   });
 });

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
+import type { MoveEventHandler } from '../../src';
 import { useMove } from '../../src';
+import { toContentPoint } from '../utils';
 import { DragContainer, DragItem } from './DragElements';
 
 const getStateStyle = ({
@@ -227,11 +229,61 @@ const NestingDrag: React.FC = () => {
   );
 };
 
+const SVGDrag: React.FC = () => {
+  const [coord, setCoord] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const onMove: MoveEventHandler = (evt, moveData) => {
+    const elem = evt.currentTarget as SVGGraphicsElement;
+    const contentPoint = toContentPoint({ x: moveData.clientX, y: moveData.clientY }, elem);
+    const lastContentPoint = toContentPoint(
+      { x: moveData.lastClientX, y: moveData.lastClientY },
+      elem
+    );
+    const movementX = contentPoint.x - lastContentPoint.x;
+    const movementY = contentPoint.y - lastContentPoint.y;
+    setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
+    if (evt.type !== 'pointermove') setDragging(false);
+  };
+  const { moveProps } = useMove({
+    onMoveStart(evt) {
+      evt.stopPropagation();
+      setDragging(true);
+    },
+    onMove,
+    onMoveEnd: onMove,
+  });
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      width="500"
+      height="300"
+      viewBox="0 0 500 300"
+      style={{ backgroundColor: 'lightgray' }}
+    >
+      <svg x="50" y="50" width="400" height="200" viewBox="0 0 80 40" overflow="visible">
+        <rect x="0" y="0" width="80" height="40" fill="lightblue" />
+        <rect
+          {...coord}
+          width="10"
+          height="10"
+          fill="white"
+          stroke={dragging ? 'red' : 'black'}
+          {...moveProps}
+        />
+      </svg>
+    </svg>
+  );
+};
+
 export const UseMoveExamples: React.FC = () => (
   <div>
     <h3>Simple drag</h3>
     <SimpleDrag />
     <h3>Nesting drag</h3>
     <NestingDrag />
+    <h2>SVG drag</h2>
+    <SVGDrag />
   </div>
 );

@@ -2,11 +2,21 @@ import type React from 'react';
 import { useMemo, useRef } from 'react';
 
 interface PartialPointerEvent<E extends Element = Element>
-  extends Pick<React.PointerEvent<E>, 'pointerId' | 'screenX' | 'screenY'> {}
+  extends Pick<
+    React.PointerEvent<E>,
+    'pointerId' | 'screenX' | 'screenY' | 'clientX' | 'clientY'
+  > {}
 
 export interface MoveData {
+  type: 'movestart' | 'move' | 'moveend' | 'trace' | 'click';
   movementX: number;
   movementY: number;
+  clientX: number;
+  clientY: number;
+  startClientX: number;
+  startClientY: number;
+  lastClientX: number;
+  lastClientY: number;
 }
 
 export type MoveEventHandler<E extends Element = Element> = (
@@ -54,15 +64,29 @@ function createPartialPointerEvent<E extends Element = Element>({
   pointerId,
   screenX,
   screenY,
+  clientX,
+  clientY,
 }: React.PointerEvent<E>): PartialPointerEvent<E> {
-  return { pointerId, screenX, screenY };
+  return { pointerId, screenX, screenY, clientX, clientY };
 }
 
 function createMoveData<E extends Element = Element>(
+  type: MoveData['type'],
   evt: PartialPointerEvent<E>,
+  startEvt: PartialPointerEvent<E>,
   lastEvt: PartialPointerEvent<E>
 ): MoveData {
-  return { movementX: evt.screenX - lastEvt.screenX, movementY: evt.screenY - lastEvt.screenY };
+  return {
+    type,
+    movementX: evt.screenX - lastEvt.screenX,
+    movementY: evt.screenY - lastEvt.screenY,
+    clientX: evt.clientX,
+    clientY: evt.clientY,
+    startClientX: startEvt.clientX,
+    startClientY: startEvt.clientY,
+    lastClientX: lastEvt.clientX,
+    lastClientY: lastEvt.clientY,
+  };
 }
 
 function defaultMoveStopButton(button: number): boolean {
@@ -97,6 +121,7 @@ export function useMove<E extends Element = Element>({
     moveStopped: boolean;
     moveStarted: boolean;
     movePropagationStopped: boolean;
+    startEvent: PartialPointerEvent<E> | null;
     lastEvent: PartialPointerEvent<E> | null;
     lastMoveCaptureEvent: PartialPointerEvent<E> | null;
     lastMoveEvent: PartialPointerEvent<E> | null;
@@ -105,6 +130,7 @@ export function useMove<E extends Element = Element>({
     moveStopped: false,
     moveStarted: false,
     movePropagationStopped: false,
+    startEvent: null,
     lastEvent: null,
     lastMoveCaptureEvent: null,
     lastMoveEvent: null,
@@ -141,28 +167,38 @@ export function useMove<E extends Element = Element>({
 
     const onPointerDown: React.PointerEventHandler<E> = (evt) => {
       (evt.target as Element).setPointerCapture(evt.pointerId);
+      const startEvt = createPartialPointerEvent(evt);
       state.current.pointerDowned = true;
       state.current.moveStopped =
         onMoveStart || onMove || onMoveEnd ? moveStopButton(evt.button) || moveStop(evt) : true;
       state.current.moveStarted = false;
       state.current.movePropagationStopped = false;
-      state.current.lastEvent = createPartialPointerEvent(evt);
+      state.current.startEvent = startEvt;
+      state.current.lastEvent = startEvt;
       if (!state.current.moveStopped) movePrepare(evt);
     };
 
     const onPointerMoveCapture: React.PointerEventHandler<E> = (evt) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      onTraceMoveCapture!(evt, createMoveData(evt, state.current.lastMoveCaptureEvent || evt));
+      onTraceMoveCapture!(
+        evt,
+        createMoveData('trace', evt, evt, state.current.lastMoveCaptureEvent || evt)
+      );
       state.current.lastMoveCaptureEvent = createPartialPointerEvent(evt);
     };
 
     const onPointerMove: React.PointerEventHandler<E> = (evt) => {
       if (
         state.current.pointerDowned &&
-        state.current.lastEvent &&
-        state.current.lastEvent.pointerId === evt.pointerId
+        state.current.startEvent &&
+        state.current.startEvent.pointerId === evt.pointerId
       ) {
-        const moveData = createMoveData(evt, state.current.lastEvent);
+        const moveData = createMoveData(
+          'move',
+          evt,
+          state.current.startEvent,
+          state.current.lastEvent! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        );
         if (!state.current.moveStarted) {
           if (
             clickTolerance &&
@@ -173,7 +209,8 @@ export function useMove<E extends Element = Element>({
           }
 
           state.current.moveStarted = true;
-          if (!state.current.moveStopped && onMoveStart) onMoveStart(evt, moveData);
+          if (!state.current.moveStopped && onMoveStart)
+            onMoveStart(evt, { ...moveData, type: 'movestart' });
           state.current.movePropagationStopped = evt.isPropagationStopped();
         } else {
           if (state.current.movePropagationStopped) evt.stopPropagation();
@@ -184,7 +221,7 @@ export function useMove<E extends Element = Element>({
       }
 
       if (onTraceMove) {
-        onTraceMove(evt, createMoveData(evt, state.current.lastMoveEvent || evt));
+        onTraceMove(evt, createMoveData('trace', evt, evt, state.current.lastMoveEvent || evt));
         state.current.lastMoveEvent = createPartialPointerEvent(evt);
       }
     };
@@ -195,15 +232,21 @@ export function useMove<E extends Element = Element>({
     };
 
     const onPointerUp: React.PointerEventHandler<E> = (evt) => {
-      if (state.current.lastEvent && state.current.lastEvent.pointerId === evt.pointerId) {
-        const moveData = createMoveData(evt, state.current.lastEvent);
+      if (state.current.startEvent && state.current.startEvent.pointerId === evt.pointerId) {
+        const moveData = createMoveData(
+          'moveend',
+          evt,
+          state.current.startEvent,
+          state.current.lastEvent! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        );
         if (state.current.moveStarted) {
           if (state.current.movePropagationStopped) evt.stopPropagation();
           if (!state.current.moveStopped && onMoveEnd) onMoveEnd(evt, moveData);
         } else if (onPureClick) {
-          onPureClick(evt, moveData);
+          onPureClick(evt, { ...moveData, type: 'click' });
         }
 
+        state.current.startEvent = null;
         state.current.lastEvent = null;
       }
     };

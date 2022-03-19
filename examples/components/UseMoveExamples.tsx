@@ -103,7 +103,7 @@ const NestingDrag: React.FC = () => {
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
     moveStop(evt) {
-      return evt.ctrlKey || evt.metaKey || evt.altKey;
+      return evt.ctrlKey || evt.metaKey;
     },
     onMoveStart(evt) {
       evt.stopPropagation();

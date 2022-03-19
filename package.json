@@ -1,10 +1,10 @@
 {
-  "private": true,
   "name": "react-use-move",
-  "version": "0.0.1",
-  "description": "",
-  "license": "UNLICENSED",
-  "author": "",
+  "version": "1.0.0",
+  "description": "React hook for move interaction by pointer event",
+  "license": "MIT",
+  "author": "ofk <ofkjpn+npm@gmail.com> (https://github.com/ofk/)",
+  "repository": "ofk/react-use-move",
   "main": "dist/index.js",
   "files": [
     "dist",
@@ -29,8 +29,8 @@
   },
   "types": "dist/index.d.ts",
   "peerDependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17",
+    "react-dom": "^17"
   },
   "devDependencies": {
     "@ofk/eslint-config-recommend": "^5.2.1",

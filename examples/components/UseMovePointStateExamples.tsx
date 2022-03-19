@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-import type { MoveEventHandler } from '../../src';
-import { useMove } from '../../src';
+import { useMove, useMovePointState } from '../../src';
 import { toContentPoint } from '../utils';
 import { DragContainer, DragItem } from './DragElements';
 
@@ -17,48 +16,28 @@ const getStateStyle = ({
 });
 
 const SimpleDrag: React.FC = () => {
-  const [coord, setCoord] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
+  const {
+    moveOptions,
+    moving: dragging,
+    setPoint: setCoord,
+    ...coord
+  } = useMovePointState({ x: 0, y: 0 });
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
-    onMoveStart() {
-      setDragging(true);
-    },
-    onMove(_evt, { movementX, movementY }) {
-      setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
-    onMoveEnd(_evt, { movementX, movementY }) {
-      setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-      setDragging(false);
-    },
+    ...moveOptions,
     onPureClick() {
       setColorInvert((invert) => !invert);
     },
     clickTolerance: 10,
   });
 
-  const [dragCoord, setDragCoord] = useState({ x: 100, y: 0 });
-  const [dragDragging, setDragDragging] = useState(false);
-  const { moveProps: dragMoveProps } = useMove({
-    onMoveStart() {
-      setDragDragging(true);
-    },
-    onMove(_evt, { movementX, movementY }) {
-      setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
-    onMoveEnd(_evt, { movementX, movementY }) {
-      setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-      setDragDragging(false);
-    },
-  });
-
-  const [clickColorInvert, setClickColorInvert] = useState(false);
-  const { moveProps: clickMoveProps } = useMove({
-    onPureClick() {
-      setClickColorInvert((invert) => !invert);
-    },
-    clickTolerance: 10,
-  });
+  const {
+    moveOptions: dragMoveOptions,
+    moving: dragDragging,
+    setPoint: setDragCoord,
+    ...dragCoord
+  } = useMovePointState({ x: 100, y: 0 });
+  const { moveProps: dragMoveProps } = useMove(dragMoveOptions);
 
   return (
     <DragContainer height={200} style={{ backgroundColor: 'lightblue', overflow: 'hidden' }}>
@@ -68,31 +47,20 @@ const SimpleDrag: React.FC = () => {
       <DragItem {...dragCoord} style={getStateStyle({ dragging: dragDragging })} {...dragMoveProps}>
         drag only
       </DragItem>
-      <DragItem
-        x={450}
-        y={150}
-        style={getStateStyle({ colorInvert: clickColorInvert })}
-        {...clickMoveProps}
-      >
-        click only
-      </DragItem>
     </DragContainer>
   );
 };
 
 const NestingDrag: React.FC = () => {
-  const [parentCoord, setParentCoord] = useState({ x: 50, y: 50 });
+  const {
+    moveOptions: parentMoveOptions,
+    moving: unuseParentMoving,
+    setPoint: setParentCoord,
+    ...parentCoord
+  } = useMovePointState({ x: 50, y: 50 });
   const [parentColorInvert, setParentColorInvert] = useState(false);
   const { moveProps: parentMoveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-    },
-    onMove(_evt, { movementX, movementY }) {
-      setParentCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
-    onMoveEnd(_evt, { movementX, movementY }) {
-      setParentCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
+    ...parentMoveOptions,
     onPureClick(evt) {
       evt.stopPropagation();
       setParentColorInvert((invert) => !invert);
@@ -100,23 +68,17 @@ const NestingDrag: React.FC = () => {
     clickTolerance: 10,
   });
 
-  const [coord, setCoord] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
+  const {
+    moveOptions,
+    moving: dragging,
+    setPoint: setCoord,
+    ...coord
+  } = useMovePointState({ x: 0, y: 0 });
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
+    ...moveOptions,
     moveStop(evt) {
       return evt.ctrlKey || evt.metaKey;
-    },
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setDragging(true);
-    },
-    onMove(_evt, { movementX, movementY }) {
-      setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
-    onMoveEnd(_evt, { movementX, movementY }) {
-      setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-      setDragging(false);
     },
     onPureClick(evt) {
       evt.stopPropagation();
@@ -125,53 +87,29 @@ const NestingDrag: React.FC = () => {
     clickTolerance: 10,
   });
 
-  const [dragCoord, setDragCoord] = useState({ x: 100, y: 0 });
-  const [dragDragging, setDragDragging] = useState(false);
-  const { moveProps: dragMoveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setDragDragging(true);
-    },
-    onMove(_evt, { movementX, movementY }) {
-      setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
-    onMoveEnd(_evt, { movementX, movementY }) {
-      setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-      setDragDragging(false);
-    },
-  });
+  const {
+    moveOptions: dragMoveOptions,
+    moving: dragDragging,
+    setPoint: setDragCoord,
+    ...dragCoord
+  } = useMovePointState({ x: 100, y: 0 });
+  const { moveProps: dragMoveProps } = useMove(dragMoveOptions);
 
   const [otherCoord, setOtherCoord] = useState({ x: 0, y: 100 });
-  const [otherDraggingCoord, setOtherDraggingCoord] = useState(otherCoord);
-  const [otherDragging, setOtherDragging] = useState(false);
-  const { moveProps: otherDraggingMoveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setOtherDragging(true);
-    },
-    onMove(_evt, { movementX, movementY }) {
-      setOtherDraggingCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    },
-    onMoveEnd(_evt, { movementX, movementY }) {
-      setOtherDraggingCoord(({ x, y }) => {
-        const nextCoord = { x: x + movementX, y: y + movementY };
-        setOtherCoord(nextCoord);
-        return nextCoord;
-      });
-      setOtherDragging(false);
+  const {
+    moveOptions: otherMoveOptions,
+    moving: otherDragging,
+    setPoint: setOtherDraggingCoord,
+    ...otherDraggingCoord
+  } = useMovePointState({
+    ...otherCoord,
+    onChange(evt, data) {
+      if (evt.type === 'pointerup' || evt.type === 'pointercancel') {
+        setOtherCoord(data);
+      }
     },
   });
-
-  const [clickColorInvert, setClickColorInvert] = useState(false);
-  const { moveProps: clickMoveProps } = useMove({
-    onPureClick(evt) {
-      evt.stopPropagation();
-      setClickColorInvert((invert) => !invert);
-    },
-    clickTolerance: 10,
-  });
-
-  const { moveProps: voidMoveProps } = useMove({});
+  const { moveProps: otherDraggingMoveProps } = useMove(otherMoveOptions);
 
   return (
     <>
@@ -208,17 +146,6 @@ const NestingDrag: React.FC = () => {
               }}
               {...otherDraggingMoveProps}
             />
-            <DragItem
-              x={250}
-              y={150}
-              style={getStateStyle({ colorInvert: clickColorInvert })}
-              {...clickMoveProps}
-            >
-              click only
-            </DragItem>
-            <DragItem x={350} y={150} {...voidMoveProps}>
-              void
-            </DragItem>
           </DragContainer>
         </DragItem>
       </DragContainer>
@@ -230,28 +157,27 @@ const NestingDrag: React.FC = () => {
 };
 
 const SVGDrag: React.FC = () => {
-  const [coord, setCoord] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const onMove: MoveEventHandler = (evt, moveData) => {
-    const elem = evt.currentTarget as SVGGraphicsElement;
-    const contentPoint = toContentPoint({ x: moveData.clientX, y: moveData.clientY }, elem);
-    const lastContentPoint = toContentPoint(
-      { x: moveData.lastClientX, y: moveData.lastClientY },
-      elem
-    );
-    const movementX = contentPoint.x - lastContentPoint.x;
-    const movementY = contentPoint.y - lastContentPoint.y;
-    setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
-    if (evt.type !== 'pointermove') setDragging(false);
-  };
-  const { moveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setDragging(true);
+  const {
+    moveOptions,
+    moving: dragging,
+    setPoint: setCoord,
+    ...coord
+  } = useMovePointState({
+    x: 0,
+    y: 0,
+    toPoint(moveData, evt) {
+      const elem = evt.currentTarget as SVGGraphicsElement;
+      const contentPoint = toContentPoint({ x: moveData.clientX, y: moveData.clientY }, elem);
+      const lastContentPoint = toContentPoint(
+        { x: moveData.lastClientX, y: moveData.lastClientY },
+        elem
+      );
+      const movementX = contentPoint.x - lastContentPoint.x;
+      const movementY = contentPoint.y - lastContentPoint.y;
+      return { x: moveData.lastX + movementX, y: moveData.lastY + movementY };
     },
-    onMove,
-    onMoveEnd: onMove,
   });
+  const { moveProps } = useMove(moveOptions);
 
   return (
     <svg

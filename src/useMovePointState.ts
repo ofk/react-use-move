@@ -1,0 +1,122 @@
+import { useCallback, useMemo, useState } from 'react';
+
+import type { MoveData, MoveOptions } from './useMove';
+import type { MoveDataOptions } from './useMoveData';
+import { useMoveData } from './useMoveData';
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface MovePointData extends MoveData {
+  startX: number;
+  startY: number;
+  lastX: number;
+  lastY: number;
+}
+
+export interface MovePointStateOptions<E extends Element = Element> {
+  x?: number;
+  y?: number;
+  minX?: number;
+  minY?: number;
+  maxX?: number;
+  maxY?: number;
+  clampPoint?: (data: Readonly<Point>) => Point;
+  toPoint?: (data: Readonly<MovePointData>, evt: React.PointerEvent<E>) => Point;
+  onChange?: (evt: React.PointerEvent<E>, data: Readonly<Point>) => void;
+}
+
+export interface MovePointStateResult<E extends Element = Element> {
+  x: number;
+  y: number;
+  moving: boolean;
+  setPoint: React.Dispatch<React.SetStateAction<Point>>;
+  moveOptions: MoveOptions<E>;
+}
+
+function defaultClampPoint(data: Readonly<Point>): Point {
+  return data;
+}
+
+function defaultPointConverter(data: Readonly<MovePointData>): Point {
+  const { startX, startY, clientX, clientY, startClientX, startClientY } = data;
+  return { x: startX + clientX - startClientX, y: startY + clientY - startClientY };
+}
+
+export function useMovePointState<E extends Element = Element>({
+  x = 0,
+  y = 0,
+  minX = -Infinity,
+  minY = -Infinity,
+  maxX = Infinity,
+  maxY = Infinity,
+  clampPoint: customClampPoint = defaultClampPoint,
+  toPoint = defaultPointConverter,
+  onChange,
+}: MovePointStateOptions<E> = {}): MovePointStateResult<E> {
+  const [point, setRawPoint] = useState({ x, y });
+  const [moving, setMoving] = useState(false);
+
+  const clampPoint = useCallback(
+    (data: Readonly<Point>): Point => {
+      const clampedPoint = customClampPoint(data);
+      return {
+        x: Math.min(Math.max(clampedPoint.x, minX), maxX),
+        y: Math.min(Math.max(clampedPoint.y, minY), maxY),
+      };
+    },
+    [minX, minY, maxX, maxY, customClampPoint]
+  );
+  const setPoint = useCallback<MovePointStateResult<E>['setPoint']>(
+    (actionOrValue) => {
+      setRawPoint((prevPoint) =>
+        clampPoint(typeof actionOrValue === 'function' ? actionOrValue(prevPoint) : actionOrValue)
+      );
+    },
+    [clampPoint]
+  );
+  const toData = useCallback<MoveDataOptions<Point, E>['toData']>(
+    ({ startData, lastData, ...moveData }, evt) =>
+      clampPoint(
+        toPoint(
+          {
+            startX: startData.x,
+            startY: startData.y,
+            lastX: lastData.x,
+            lastY: lastData.y,
+            ...moveData,
+          },
+          evt
+        )
+      ),
+    [clampPoint, toPoint]
+  );
+
+  const moveDataOptions = useMemo<
+    Pick<MoveDataOptions<Point, E>, 'onMoveStart' | 'onMove' | 'onMoveEnd'>
+  >(
+    () => ({
+      onMoveStart(evt, data): void {
+        onChange?.(evt, data);
+        setPoint(data);
+        setMoving(true);
+      },
+      onMove(evt, data): void {
+        onChange?.(evt, data);
+        setPoint(data);
+      },
+      onMoveEnd(evt, data): void {
+        onChange?.(evt, data);
+        setPoint(data);
+        setMoving(false);
+      },
+    }),
+    [onChange, setPoint]
+  );
+
+  const { moveOptions } = useMoveData({ data: point, toData, ...moveDataOptions });
+
+  return { ...point, moving, setPoint, moveOptions };
+}

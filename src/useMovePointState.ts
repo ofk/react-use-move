@@ -17,22 +17,32 @@ interface MovePointData extends MoveData {
 }
 
 export interface MovePointStateOptions<E extends Element = Element> {
+  // Initial coordinate.
   x?: number;
   y?: number;
+  // Minimum coordinate.
   minX?: number;
   minY?: number;
+  // Maximum coordinate.
   maxX?: number;
   maxY?: number;
+  // Function to round coordinate.
   clampPoint?: (data: Readonly<Point>) => Point;
+  // Function to convert from drag operation to coordinate.
   toPoint?: (data: Readonly<MovePointData>, evt: React.PointerEvent<E>) => Point;
+  // Handler that is called when a coordinate changes.
   onChange?: (evt: React.PointerEvent<E>, data: Readonly<Point>) => void;
 }
 
 export interface MovePointStateResult<E extends Element = Element> {
+  // Current coordinate.
   x: number;
   y: number;
+  // Moving status.
   moving: boolean;
+  // Function to update coordinate.
   setPoint: React.Dispatch<React.SetStateAction<Point>>;
+  // Options given to useMove.
   moveOptions: MoveOptions<E>;
 }
 

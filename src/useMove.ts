@@ -33,15 +33,23 @@ export type MoveStopHandler<E extends Element = Element> = (evt: React.PointerEv
 export type MoveNoticeEventHandler<E extends Element = Element> = React.PointerEventHandler<E>;
 
 export interface MoveOptions<E extends Element = Element> {
+  // Handler that is called when a move interaction starts.
   onMoveStart?: MoveEventHandler<E>;
+  // Handler that is called when the element is moved.
   onMove?: MoveEventHandler<E>;
+  // Handler that is called when a move interaction ends.
   onMoveEnd?: MoveEventHandler<E>;
+  // Handler that is called when the pointer is moved. In other words, this is onPointerMove that can be used together.
   onTraceMove?: MoveEventHandler<E>;
   onTraceMoveCapture?: MoveEventHandler<E>;
+  // Handler that is called when the pointer is clicked. When this handler is called, no move interaction occurs.
   onPureClick?: MoveEventHandler<E>;
+  // The max number of pixels a user can shift the mouse pointer during a click for it to be considered a valid click (as opposed to a mouse drag).
   clickTolerance?: number;
+  // Condition to inhibit move interaction. For example, right drag can be prohibited.
   moveStopButton?: MoveStopButtonHandler<E>;
   moveStop?: MoveStopHandler<E>;
+  // Callbacks called before and after the move interaction. Used to control the mouse cursor.
   movePrepare?: MoveNoticeEventHandler<E>;
   moveFinish?: MoveNoticeEventHandler<E>;
 }
@@ -57,6 +65,7 @@ export interface MoveProps<E extends Element = Element> {
 }
 
 export interface MoveResult<E extends Element = Element> {
+  // Props to spread on the target element.
   moveProps: MoveProps<E>;
 }
 

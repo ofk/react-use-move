@@ -27,7 +27,9 @@ export type ExtendMoveDataConverter<D, F extends (...args: never[]) => unknown> 
 
 export interface MoveDataOptions<D, E extends Element = Element>
   extends ExtendMoveOptions<D, MoveOptions<E>> {
+  // Any data.
   data: Readonly<D>;
+  // Function to convert from drag operation to data.
   toData: ExtendMoveDataConverter<D, NonNullable<MoveOptions<E>['onMove']>>;
 }
 
@@ -42,6 +44,7 @@ export type MoveDataConverter<D, E extends Element = Element> = ExtendMoveDataCo
 >;
 
 export interface MoveDataResult<E extends Element = Element> {
+  // Options given to useMove.
   moveOptions: MoveOptions<E>;
 }
 

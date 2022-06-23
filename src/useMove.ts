@@ -55,6 +55,7 @@ export interface MoveOptions<E extends Element = Element> {
 }
 
 export interface MoveProps<E extends Element = Element> {
+  onPointerDownCapture?: React.PointerEventHandler<E>;
   onPointerDown?: React.PointerEventHandler<E>;
   onPointerMoveCapture?: React.PointerEventHandler<E>;
   onPointerMove?: React.PointerEventHandler<E>;
@@ -174,7 +175,7 @@ export function useMove<E extends Element = Element>({
         ? warnToCallStopPropagation('onTraceMoveCapture', rawOnTraceMoveCapture)
         : rawOnTraceMoveCapture;
 
-    const onPointerDown: React.PointerEventHandler<E> = (evt) => {
+    const onPointerDownCapture: React.PointerEventHandler<E> = (evt) => {
       (evt.target as Element).setPointerCapture(evt.pointerId);
       const startEvt = createPartialPointerEvent(evt);
       state.current.pointerDowned = true;
@@ -185,6 +186,19 @@ export function useMove<E extends Element = Element>({
       state.current.startEvent = startEvt;
       state.current.lastEvent = startEvt;
       if (!state.current.moveStopped) movePrepare(evt);
+    };
+
+    const onPointerDown: React.PointerEventHandler<E> = (evt): void => {
+      if (
+        state.current.pointerDowned &&
+        state.current.startEvent &&
+        state.current.startEvent.pointerId === evt.pointerId
+      ) {
+        state.current.moveStarted = true;
+        if (!state.current.moveStopped && onMoveStart)
+          onMoveStart(evt, createMoveData('movestart', evt, evt, evt));
+        state.current.movePropagationStopped = evt.isPropagationStopped();
+      }
     };
 
     const onPointerMoveCapture: React.PointerEventHandler<E> = (evt) => {
@@ -264,7 +278,7 @@ export function useMove<E extends Element = Element>({
       ...(onTraceMoveCapture ? { onPointerMoveCapture } : {}),
       ...(onMoveStart || onMove || onMoveEnd || onTraceMove || onPureClick
         ? {
-            onPointerDown,
+            onPointerDownCapture,
             onPointerMove,
             onPointerUpCapture,
             onPointerUp,
@@ -272,6 +286,7 @@ export function useMove<E extends Element = Element>({
             onPointerCancel: onPointerUp,
           }
         : {}),
+      ...(onMoveStart && !onPureClick && !clickTolerance ? { onPointerDown } : {}),
     };
   }, [
     moveStopButton,

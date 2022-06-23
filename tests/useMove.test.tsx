@@ -208,7 +208,8 @@ describe('useMove with move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
     expect(results).toStrictEqual([
-      { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
+      { name: 'start', type: 'pointerdown', movementX: 0, movementY: 0 },
+      { name: 'move', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
       { name: 'end', type: 'pointerup', movementX: 0, movementY: 0 },
     ]);
@@ -219,7 +220,10 @@ describe('useMove with move options', () => {
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 10, screenY: 40 });
-    expect(results).toStrictEqual([]);
+    expect(results).toStrictEqual([
+      { name: 'start', type: 'pointerdown', movementX: 0, movementY: 0 },
+      { name: 'end', type: 'pointerup', movementX: 0, movementY: 0 },
+    ]);
 
     clearResults();
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
@@ -227,7 +231,8 @@ describe('useMove with move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41 });
     expect(results).toStrictEqual([
-      { name: 'start', type: 'pointermove', movementX: 1, movementY: 0 },
+      { name: 'start', type: 'pointerdown', movementX: 0, movementY: 0 },
+      { name: 'move', type: 'pointermove', movementX: 1, movementY: 0 },
       { name: 'move', type: 'pointermove', movementX: 0, movementY: 1 },
       { name: 'end', type: 'pointerup', movementX: 0, movementY: 0 },
     ]);
@@ -299,6 +304,7 @@ describe('useMove with move and pure move options', () => {
         onMoveStart={addResult('start')}
         onMove={addResult('move')}
         onMoveEnd={addResult('end')}
+        onPureClick={addResult('click')}
         onTraceMove={addResult('trace', false)}
         onTraceMoveCapture={addResult('trace-cap', false)}
       >

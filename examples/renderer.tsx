@@ -1,11 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { App } from './components/App';
 
-ReactDOM.render(
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+createRoot(document.querySelector('#app')!).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
-  document.querySelector('#app')
+  </React.StrictMode>
 );

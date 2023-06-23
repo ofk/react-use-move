@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 
+import { useEffectEvent } from './useEffectEvent';
 import type { MoveOptions } from './useMove';
 
 export type ExtendMoveDataEventHandler<D, F extends (...args: never[]) => unknown> = (
@@ -51,9 +52,9 @@ export interface MoveDataResult<E extends Element = Element> {
 export function useMoveData<D, E extends Element = Element>({
   data,
   toData,
-  onMoveStart: onCustomMoveStart,
-  onMove: onCustomMove,
-  onMoveEnd: onCustomMoveEnd,
+  onMoveStart: rawOnMoveStart,
+  onMove: rawOnMove,
+  onMoveEnd: rawOnMoveEnd,
   ...options
 }: MoveDataOptions<D, E>): MoveDataResult<E> {
   const state = useRef<{
@@ -66,9 +67,13 @@ export function useMoveData<D, E extends Element = Element>({
     lastData: null,
   });
 
+  const onMoveStart = useEffectEvent(rawOnMoveStart);
+  const onMove = useEffectEvent(rawOnMove);
+  const onMoveEnd = useEffectEvent(rawOnMoveEnd);
+
   const moveOptions = useMemo<MoveOptions<E>>(
     () =>
-      onCustomMoveStart || onCustomMove || onCustomMoveEnd
+      onMoveStart || onMove || onMoveEnd
         ? {
             onMoveStart(evt, moveData): void {
               evt.stopPropagation();
@@ -76,7 +81,7 @@ export function useMoveData<D, E extends Element = Element>({
               const lastData = toData({ startData, lastData: startData, ...moveData }, evt);
               state.current.startData = startData;
               state.current.lastData = lastData;
-              onCustomMoveStart?.(evt, lastData);
+              onMoveStart?.(evt, lastData);
             },
             onMove(evt, moveData): void {
               const lastData = toData(
@@ -90,7 +95,7 @@ export function useMoveData<D, E extends Element = Element>({
                 evt
               );
               state.current.lastData = lastData;
-              onCustomMove?.(evt, lastData);
+              onMove?.(evt, lastData);
             },
             onMoveEnd(evt, moveData): void {
               const lastData = toData(
@@ -105,11 +110,11 @@ export function useMoveData<D, E extends Element = Element>({
               );
               state.current.startData = null;
               state.current.lastData = null;
-              onCustomMoveEnd?.(evt, lastData);
+              onMoveEnd?.(evt, lastData);
             },
           }
         : {},
-    [toData, onCustomMoveStart, onCustomMove, onCustomMoveEnd]
+    [toData, onMoveStart, onMove, onMoveEnd]
   );
 
   state.current.data = data;

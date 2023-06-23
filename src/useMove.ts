@@ -1,6 +1,8 @@
 import type React from 'react';
 import { useMemo, useRef } from 'react';
 
+import { useEffectEvent } from './useEffectEvent';
+
 interface PartialPointerEvent<E extends Element = Element>
   extends Pick<
     React.PointerEvent<E>,
@@ -113,19 +115,38 @@ function defaultMovePrepare(evt: React.PointerEvent): void {
 
 function defaultMoveFinish(): void {}
 
+const warnToCallStopPropagation = <
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  F extends (evt: React.PointerEvent<any>, ...args: never[]) => unknown
+>(
+  name: string,
+  fn: F
+): F =>
+  ((...args) => {
+    const evt = args[0];
+    const isPropagationStopped = evt.isPropagationStopped();
+    const ret = fn(...args);
+    if (!isPropagationStopped && evt.isPropagationStopped()) {
+      console.error(`Calling stopPropagation in "${name}" is deprecated.`);
+    }
+    return ret;
+  }) as F;
+
 export function useMove<E extends Element = Element>({
-  moveStopButton = defaultMoveStopButton,
+  moveStopButton: rawMoveStopButton = defaultMoveStopButton,
   moveStop: rawMoveStop = defaultMoveStop,
   movePrepare: rawMovePrepare = defaultMovePrepare,
   moveFinish: rawMoveFinish = defaultMoveFinish,
-  onMoveStart,
-  onMove,
-  onMoveEnd,
+  onMoveStart: rawOnMoveStart,
+  onMove: rawOnMove,
+  onMoveEnd: rawOnMoveEnd,
   onTraceMoveCapture: rawOnTraceMoveCapture,
-  onTraceMove,
-  onPureClick,
+  onTraceMove: rawOnTraceMove,
+  onPureClick: rawOnPureClick,
   clickTolerance,
 }: MoveOptions<E>): MoveResult<E> {
+  const DEV = process.env.NODE_ENV !== 'production';
+
   const state = useRef<{
     pointerDowned: boolean;
     moveStopped: boolean;
@@ -146,35 +167,28 @@ export function useMove<E extends Element = Element>({
     lastMoveEvent: null,
   });
 
+  const moveStopButton = useEffectEvent(rawMoveStopButton);
+  const moveStop = useEffectEvent(
+    DEV ? warnToCallStopPropagation('moveStop', rawMoveStop) : rawMoveStop
+  );
+  const movePrepare = useEffectEvent(
+    DEV ? warnToCallStopPropagation('movePrepare', rawMovePrepare) : rawMovePrepare
+  );
+  const moveFinish = useEffectEvent(
+    DEV ? warnToCallStopPropagation('moveFinish', rawMoveFinish) : rawMoveFinish
+  );
+  const onMoveStart = useEffectEvent(rawOnMoveStart);
+  const onMove = useEffectEvent(rawOnMove);
+  const onMoveEnd = useEffectEvent(rawOnMoveEnd);
+  const onTraceMoveCapture = useEffectEvent(
+    DEV && rawOnTraceMoveCapture
+      ? warnToCallStopPropagation('onTraceMoveCapture', rawOnTraceMoveCapture)
+      : rawOnTraceMoveCapture
+  );
+  const onTraceMove = useEffectEvent(rawOnTraceMove);
+  const onPureClick = useEffectEvent(rawOnPureClick);
+
   const moveProps = useMemo(() => {
-    const DEV = process.env.NODE_ENV !== 'production';
-
-    const warnToCallStopPropagation = <
-      F extends (evt: React.PointerEvent<E>, ...args: never[]) => unknown
-    >(
-      name: string,
-      fn: F
-    ): F =>
-      ((...args) => {
-        const evt = args[0];
-        const isPropagationStopped = evt.isPropagationStopped();
-        const ret = fn(...args);
-        if (!isPropagationStopped && evt.isPropagationStopped()) {
-          console.error(`Calling stopPropagation in "${name}" is deprecated.`);
-        }
-        return ret;
-      }) as F;
-
-    const moveStop = DEV ? warnToCallStopPropagation('moveStop', rawMoveStop) : rawMoveStop;
-    const movePrepare = DEV
-      ? warnToCallStopPropagation('movePrepare', rawMovePrepare)
-      : rawMovePrepare;
-    const moveFinish = DEV ? warnToCallStopPropagation('moveFinish', rawMoveFinish) : rawMoveFinish;
-    const onTraceMoveCapture =
-      DEV && rawOnTraceMoveCapture
-        ? warnToCallStopPropagation('onTraceMoveCapture', rawOnTraceMoveCapture)
-        : rawOnTraceMoveCapture;
-
     const onPointerDownCapture: React.PointerEventHandler<E> = (evt) => {
       (evt.target as Element).setPointerCapture(evt.pointerId);
       const startEvt = createPartialPointerEvent(evt);
@@ -290,14 +304,14 @@ export function useMove<E extends Element = Element>({
     };
   }, [
     moveStopButton,
-    rawMoveStop,
-    rawMovePrepare,
-    rawMoveFinish,
+    moveStop,
+    movePrepare,
+    moveFinish,
     onMoveStart,
     onMove,
     onMoveEnd,
+    onTraceMoveCapture,
     onTraceMove,
-    rawOnTraceMoveCapture,
     onPureClick,
     clickTolerance,
   ]);

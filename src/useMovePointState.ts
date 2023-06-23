@@ -1,7 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { MoveData, MoveOptions } from './useMove';
-import type { MoveDataOptions } from './useMoveData';
 import { useMoveData } from './useMoveData';
 
 interface Point {
@@ -87,9 +86,11 @@ export function useMovePointState<E extends Element = Element>({
     },
     [clampPoint]
   );
-  const toData = useCallback<MoveDataOptions<Point, E>['toData']>(
-    ({ startData, lastData, ...moveData }, evt) =>
-      clampPoint(
+
+  const { moveOptions } = useMoveData<Point, E>({
+    data: point,
+    toData({ startData, lastData, ...moveData }, evt) {
+      return clampPoint(
         toPoint(
           {
             startX: startData.x,
@@ -100,33 +101,23 @@ export function useMovePointState<E extends Element = Element>({
           },
           evt
         )
-      ),
-    [clampPoint, toPoint]
-  );
-
-  const moveDataOptions = useMemo<
-    Pick<MoveDataOptions<Point, E>, 'onMoveStart' | 'onMove' | 'onMoveEnd'>
-  >(
-    () => ({
-      onMoveStart(evt, data): void {
-        onChange?.(evt, data);
-        setPoint(data);
-        setMoving(true);
-      },
-      onMove(evt, data): void {
-        onChange?.(evt, data);
-        setPoint(data);
-      },
-      onMoveEnd(evt, data): void {
-        onChange?.(evt, data);
-        setPoint(data);
-        setMoving(false);
-      },
-    }),
-    [onChange, setPoint]
-  );
-
-  const { moveOptions } = useMoveData({ data: point, toData, ...moveDataOptions });
+      );
+    },
+    onMoveStart(evt, data): void {
+      onChange?.(evt, data);
+      setPoint(data);
+      setMoving(true);
+    },
+    onMove(evt, data): void {
+      onChange?.(evt, data);
+      setPoint(data);
+    },
+    onMoveEnd(evt, data): void {
+      onChange?.(evt, data);
+      setPoint(data);
+      setMoving(false);
+    },
+  });
 
   return { ...point, moving, setPoint, moveOptions };
 }

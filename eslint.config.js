@@ -13,5 +13,4 @@ export default config({
     },
   ],
   ignores: ['dist', 'coverage'],
-  perfectionist: false,
 });

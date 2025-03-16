@@ -1,5 +1,5 @@
-export * from './useIsomorphicLayoutEffect';
 export * from './useEffectEvent';
+export * from './useIsomorphicLayoutEffect';
 
 export * from './useMove';
 export * from './useMoveData';

@@ -1,16 +1,17 @@
 import { useState } from 'react';
 
 import type { MoveEventHandler } from '../../src';
+
 import { useMove } from '../../src';
 import { toContentPoint } from '../utils';
 import { DragContainer, DragItem } from './DragElements';
 
 const getStateStyle = ({
-  dragging,
   colorInvert,
+  dragging,
 }: {
-  dragging?: boolean;
   colorInvert?: boolean;
+  dragging?: boolean;
 }): React.CSSProperties => ({
   ...(dragging ? { borderColor: 'red' } : {}),
   ...(colorInvert ? { backgroundColor: 'black', color: 'white' } : {}),
@@ -21,9 +22,7 @@ function SimpleDrag(): React.ReactElement {
   const [dragging, setDragging] = useState(false);
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
-    onMoveStart() {
-      setDragging(true);
-    },
+    clickTolerance: 10,
     onMove(_evt, { movementX, movementY }) {
       setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
     },
@@ -31,18 +30,17 @@ function SimpleDrag(): React.ReactElement {
       setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
       setDragging(false);
     },
+    onMoveStart() {
+      setDragging(true);
+    },
     onPureClick() {
       setColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const [dragCoord, setDragCoord] = useState({ x: 100, y: 0 });
   const [dragDragging, setDragDragging] = useState(false);
   const { moveProps: dragMoveProps } = useMove({
-    onMoveStart() {
-      setDragDragging(true);
-    },
     onMove(_evt, { movementX, movementY }) {
       setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
     },
@@ -50,28 +48,31 @@ function SimpleDrag(): React.ReactElement {
       setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
       setDragDragging(false);
     },
+    onMoveStart() {
+      setDragDragging(true);
+    },
   });
 
   const [clickColorInvert, setClickColorInvert] = useState(false);
   const { moveProps: clickMoveProps } = useMove({
+    clickTolerance: 10,
     onPureClick() {
       setClickColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   return (
     <DragContainer height={200} style={{ backgroundColor: 'lightblue', overflow: 'hidden' }}>
-      <DragItem {...coord} style={getStateStyle({ dragging, colorInvert })} {...moveProps}>
+      <DragItem {...coord} style={getStateStyle({ colorInvert, dragging })} {...moveProps}>
         drag click
       </DragItem>
       <DragItem {...dragCoord} style={getStateStyle({ dragging: dragDragging })} {...dragMoveProps}>
         drag only
       </DragItem>
       <DragItem
+        style={getStateStyle({ colorInvert: clickColorInvert })}
         x={450}
         y={150}
-        style={getStateStyle({ colorInvert: clickColorInvert })}
         {...clickMoveProps}
       >
         click only
@@ -84,32 +85,29 @@ function NestingDrag(): React.ReactElement {
   const [parentCoord, setParentCoord] = useState({ x: 50, y: 50 });
   const [parentColorInvert, setParentColorInvert] = useState(false);
   const { moveProps: parentMoveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-    },
+    clickTolerance: 10,
     onMove(_evt, { movementX, movementY }) {
       setParentCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
     },
     onMoveEnd(_evt, { movementX, movementY }) {
       setParentCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
     },
+    onMoveStart(evt) {
+      evt.stopPropagation();
+    },
     onPureClick(evt) {
       evt.stopPropagation();
       setParentColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const [coord, setCoord] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
+    clickTolerance: 10,
     moveStop(evt) {
       return evt.ctrlKey || evt.metaKey;
-    },
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setDragging(true);
     },
     onMove(_evt, { movementX, movementY }) {
       setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
@@ -118,20 +116,19 @@ function NestingDrag(): React.ReactElement {
       setCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
       setDragging(false);
     },
+    onMoveStart(evt) {
+      evt.stopPropagation();
+      setDragging(true);
+    },
     onPureClick(evt) {
       evt.stopPropagation();
       setColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const [dragCoord, setDragCoord] = useState({ x: 100, y: 0 });
   const [dragDragging, setDragDragging] = useState(false);
   const { moveProps: dragMoveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setDragDragging(true);
-    },
     onMove(_evt, { movementX, movementY }) {
       setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
     },
@@ -139,16 +136,16 @@ function NestingDrag(): React.ReactElement {
       setDragCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
       setDragDragging(false);
     },
+    onMoveStart(evt) {
+      evt.stopPropagation();
+      setDragDragging(true);
+    },
   });
 
   const [otherCoord, setOtherCoord] = useState({ x: 0, y: 100 });
   const [otherDraggingCoord, setOtherDraggingCoord] = useState(otherCoord);
   const [otherDragging, setOtherDragging] = useState(false);
   const { moveProps: otherDraggingMoveProps } = useMove({
-    onMoveStart(evt) {
-      evt.stopPropagation();
-      setOtherDragging(true);
-    },
     onMove(_evt, { movementX, movementY }) {
       setOtherDraggingCoord(({ x, y }) => ({ x: x + movementX, y: y + movementY }));
     },
@@ -160,15 +157,19 @@ function NestingDrag(): React.ReactElement {
       });
       setOtherDragging(false);
     },
+    onMoveStart(evt) {
+      evt.stopPropagation();
+      setOtherDragging(true);
+    },
   });
 
   const [clickColorInvert, setClickColorInvert] = useState(false);
   const { moveProps: clickMoveProps } = useMove({
+    clickTolerance: 10,
     onPureClick(evt) {
       evt.stopPropagation();
       setClickColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const { moveProps: voidMoveProps } = useMove({});
@@ -178,16 +179,16 @@ function NestingDrag(): React.ReactElement {
       <DragContainer style={{ backgroundColor: 'lightgray', overflow: 'hidden' }}>
         <DragItem
           {...parentCoord}
-          width={400}
           height={200}
           style={{
             backgroundColor: parentColorInvert ? 'lightpink' : 'lightblue',
             border: undefined,
           }}
+          width={400}
           {...parentMoveProps}
         >
-          <DragContainer width={400} height={200}>
-            <DragItem {...coord} style={getStateStyle({ dragging, colorInvert })} {...moveProps}>
+          <DragContainer height={200} width={400}>
+            <DragItem {...coord} style={getStateStyle({ colorInvert, dragging })} {...moveProps}>
               drag click
             </DragItem>
             <DragItem
@@ -200,18 +201,18 @@ function NestingDrag(): React.ReactElement {
             <DragItem {...otherCoord}>other drag</DragItem>
             <DragItem
               {...otherDraggingCoord}
-              width={50}
               height={50}
               style={{
                 backgroundColor: undefined,
                 color: otherDragging ? 'red' : undefined,
               }}
+              width={50}
               {...otherDraggingMoveProps}
             />
             <DragItem
+              style={getStateStyle({ colorInvert: clickColorInvert })}
               x={250}
               y={150}
-              style={getStateStyle({ colorInvert: clickColorInvert })}
               {...clickMoveProps}
             >
               click only
@@ -245,31 +246,31 @@ function SVGDrag(): React.ReactElement {
     if (evt.type !== 'pointermove') setDragging(false);
   };
   const { moveProps } = useMove({
+    onMove,
+    onMoveEnd: onMove,
     onMoveStart(evt) {
       evt.stopPropagation();
       setDragging(true);
     },
-    onMove,
-    onMoveEnd: onMove,
   });
 
   return (
     <svg
+      height="300"
+      style={{ backgroundColor: 'lightgray' }}
+      viewBox="0 0 500 300"
+      width="500"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      width="500"
-      height="300"
-      viewBox="0 0 500 300"
-      style={{ backgroundColor: 'lightgray' }}
     >
-      <svg x="50" y="50" width="400" height="200" viewBox="0 0 80 40" overflow="visible">
-        <rect x="0" y="0" width="80" height="40" fill="lightblue" />
+      <svg height="200" overflow="visible" viewBox="0 0 80 40" width="400" x="50" y="50">
+        <rect fill="lightblue" height="40" width="80" x="0" y="0" />
         <rect
           {...coord}
-          width="10"
-          height="10"
           fill="white"
+          height="10"
           stroke={dragging ? 'red' : 'black'}
+          width="10"
           {...moveProps}
         />
       </svg>

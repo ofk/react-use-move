@@ -3,6 +3,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import type { MovePointStateOptions } from '../src/useMovePointState';
+
 import { useMovePointState } from '../src/useMovePointState';
 import { MoveDataGenerator } from './MoveDataGenerator';
 
@@ -20,7 +21,7 @@ describe('useMovePointState', () => {
     const moveData = new MoveDataGenerator(100, 100);
     act(() => {
       moveOptions.onMoveStart!(
-        { type: 'pointerdown', stopPropagation() {} } as any,
+        { stopPropagation() {}, type: 'pointerdown' } as any,
         moveData.get(),
       );
     });
@@ -69,12 +70,12 @@ describe('useMovePointState', () => {
   it('can move with min/max values', () => {
     const { result } = renderHook(() =>
       useMovePointState({
-        x: 10,
-        y: 20,
-        minX: 0,
-        minY: 0,
         maxX: 30,
         maxY: 30,
+        minX: 0,
+        minY: 0,
+        x: 10,
+        y: 20,
       }),
     );
 
@@ -85,7 +86,7 @@ describe('useMovePointState', () => {
     const moveData = new MoveDataGenerator(10, 20);
     act(() => {
       moveOptions.onMoveStart!(
-        { type: 'pointerdown', stopPropagation() {} } as any,
+        { stopPropagation() {}, type: 'pointerdown' } as any,
         moveData.get(),
       );
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());
@@ -164,7 +165,7 @@ describe('useMovePointState', () => {
     const moveData = new MoveDataGenerator(100, 200);
     act(() => {
       moveOptions.onMoveStart!(
-        { type: 'pointerdown', stopPropagation() {} } as any,
+        { stopPropagation() {}, type: 'pointerdown' } as any,
         moveData.get(),
       );
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());

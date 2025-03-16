@@ -76,15 +76,15 @@ export function useMovePointState<E extends Element = Element>({
         y: Math.min(Math.max(clampedPoint.y, minY), maxY),
       };
     },
-    [minX, minY, maxX, maxY, customClampPoint]
+    [minX, minY, maxX, maxY, customClampPoint],
   );
   const setPoint = useCallback<MovePointStateResult<E>['setPoint']>(
     (actionOrValue) => {
       setRawPoint((prevPoint) =>
-        clampPoint(typeof actionOrValue === 'function' ? actionOrValue(prevPoint) : actionOrValue)
+        clampPoint(typeof actionOrValue === 'function' ? actionOrValue(prevPoint) : actionOrValue),
       );
     },
-    [clampPoint]
+    [clampPoint],
   );
 
   const { moveOptions } = useMoveData<Point, E>({
@@ -99,8 +99,8 @@ export function useMovePointState<E extends Element = Element>({
             lastY: lastData.y,
             ...moveData,
           },
-          evt
-        )
+          evt,
+        ),
       );
     },
     onMoveStart(evt, data): void {

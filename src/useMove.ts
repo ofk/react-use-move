@@ -23,11 +23,11 @@ export interface MoveData {
 
 export type MoveEventHandler<E extends Element = Element> = (
   evt: React.PointerEvent<E>,
-  data: Readonly<MoveData>
+  data: Readonly<MoveData>,
 ) => void;
 
 export type MoveStopButtonHandler<E extends Element = Element> = (
-  button: React.PointerEvent<E>['button']
+  button: React.PointerEvent<E>['button'],
 ) => boolean;
 
 export type MoveStopHandler<E extends Element = Element> = (evt: React.PointerEvent<E>) => boolean;
@@ -86,7 +86,7 @@ function createMoveData<E extends Element = Element>(
   type: MoveData['type'],
   evt: PartialPointerEvent<E>,
   startEvt: PartialPointerEvent<E>,
-  lastEvt: PartialPointerEvent<E>
+  lastEvt: PartialPointerEvent<E>,
 ): MoveData {
   return {
     type,
@@ -113,14 +113,16 @@ function defaultMovePrepare(evt: React.PointerEvent): void {
   evt.preventDefault();
 }
 
-function defaultMoveFinish(): void {}
+function defaultMoveFinish(): void {
+  // noop
+}
 
 const warnToCallStopPropagation = <
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  F extends (evt: React.PointerEvent<any>, ...args: never[]) => unknown
+  F extends (evt: React.PointerEvent<any>, ...args: never[]) => unknown,
 >(
   name: string,
-  fn: F
+  fn: F,
 ): F =>
   ((...args) => {
     const evt = args[0];
@@ -169,13 +171,13 @@ export function useMove<E extends Element = Element>({
 
   const moveStopButton = useEffectEvent(rawMoveStopButton);
   const moveStop = useEffectEvent(
-    DEV ? warnToCallStopPropagation('moveStop', rawMoveStop) : rawMoveStop
+    DEV ? warnToCallStopPropagation('moveStop', rawMoveStop) : rawMoveStop,
   );
   const movePrepare = useEffectEvent(
-    DEV ? warnToCallStopPropagation('movePrepare', rawMovePrepare) : rawMovePrepare
+    DEV ? warnToCallStopPropagation('movePrepare', rawMovePrepare) : rawMovePrepare,
   );
   const moveFinish = useEffectEvent(
-    DEV ? warnToCallStopPropagation('moveFinish', rawMoveFinish) : rawMoveFinish
+    DEV ? warnToCallStopPropagation('moveFinish', rawMoveFinish) : rawMoveFinish,
   );
   const onMoveStart = useEffectEvent(rawOnMoveStart);
   const onMove = useEffectEvent(rawOnMove);
@@ -183,7 +185,7 @@ export function useMove<E extends Element = Element>({
   const onTraceMoveCapture = useEffectEvent(
     DEV && rawOnTraceMoveCapture
       ? warnToCallStopPropagation('onTraceMoveCapture', rawOnTraceMoveCapture)
-      : rawOnTraceMoveCapture
+      : rawOnTraceMoveCapture,
   );
   const onTraceMove = useEffectEvent(rawOnTraceMove);
   const onPureClick = useEffectEvent(rawOnPureClick);
@@ -219,7 +221,7 @@ export function useMove<E extends Element = Element>({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       onTraceMoveCapture!(
         evt,
-        createMoveData('trace', evt, evt, state.current.lastMoveCaptureEvent || evt)
+        createMoveData('trace', evt, evt, state.current.lastMoveCaptureEvent ?? evt),
       );
       state.current.lastMoveCaptureEvent = createPartialPointerEvent(evt);
     };
@@ -234,9 +236,12 @@ export function useMove<E extends Element = Element>({
           'move',
           evt,
           state.current.startEvent,
-          state.current.lastEvent! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          state.current.lastEvent!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
         );
-        if (!state.current.moveStarted) {
+        if (state.current.moveStarted) {
+          if (state.current.movePropagationStopped) evt.stopPropagation();
+          if (!state.current.moveStopped && onMove) onMove(evt, moveData);
+        } else {
           if (
             clickTolerance &&
             Math.hypot(moveData.movementX, moveData.movementY) < clickTolerance
@@ -249,16 +254,13 @@ export function useMove<E extends Element = Element>({
           if (!state.current.moveStopped && onMoveStart)
             onMoveStart(evt, { ...moveData, type: 'movestart' });
           state.current.movePropagationStopped = evt.isPropagationStopped();
-        } else {
-          if (state.current.movePropagationStopped) evt.stopPropagation();
-          if (!state.current.moveStopped && onMove) onMove(evt, moveData);
         }
 
         state.current.lastEvent = createPartialPointerEvent(evt);
       }
 
       if (onTraceMove) {
-        onTraceMove(evt, createMoveData('trace', evt, evt, state.current.lastMoveEvent || evt));
+        onTraceMove(evt, createMoveData('trace', evt, evt, state.current.lastMoveEvent ?? evt));
         state.current.lastMoveEvent = createPartialPointerEvent(evt);
       }
     };
@@ -274,7 +276,7 @@ export function useMove<E extends Element = Element>({
           'moveend',
           evt,
           state.current.startEvent,
-          state.current.lastEvent! // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          state.current.lastEvent!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
         );
         if (state.current.moveStarted) {
           if (state.current.movePropagationStopped) evt.stopPropagation();

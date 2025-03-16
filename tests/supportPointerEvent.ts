@@ -1,3 +1,6 @@
+/* eslint-disable vitest/prefer-spy-on */
+import { vi } from 'vitest';
+
 // cf. https://github.com/testing-library/dom-testing-library/issues/558
 
 const pointerEventCtorProps = ['pointerId', 'pageX', 'pageY'] as const;
@@ -15,20 +18,18 @@ class FakePointerEvent extends MouseEvent {
   }
 }
 
-export function supportPointerEvent(): void {
-  beforeAll(() => {
-    // @ts-expect-error: Create mock PointerEvent class
-    global.PointerEvent = FakePointerEvent;
-    HTMLElement.prototype.setPointerCapture = jest.fn().mockImplementation(() => {});
-    HTMLElement.prototype.releasePointerCapture = jest.fn().mockImplementation(() => {});
-  });
+export function supportPointerEvent(): () => void {
+  // @ts-expect-error: Create mock PointerEvent class
+  global.PointerEvent = FakePointerEvent;
+  HTMLElement.prototype.setPointerCapture = vi.fn().mockImplementation(() => {});
+  HTMLElement.prototype.releasePointerCapture = vi.fn().mockImplementation(() => {});
 
-  afterAll(() => {
+  return (): void => {
     // @ts-expect-error: Remove mock PointerEvent class
     delete global.PointerEvent;
     // @ts-expect-error: Remove mock setPointerCapture method
     delete HTMLElement.prototype.setPointerCapture;
     // @ts-expect-error: Remove mock releasePointerCapture method
     delete HTMLElement.prototype.releasePointerCapture;
-  });
+  };
 }

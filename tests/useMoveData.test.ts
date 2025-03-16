@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook } from '@testing-library/react';
 import { useState } from 'react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { useMoveData } from '../src/useMoveData';
 import { MoveDataGenerator } from './MoveDataGenerator';
 
 describe('useMoveData', () => {
+  afterEach(cleanup);
+
   it('can move with point', () => {
     const { result } = renderHook(() => {
       const [state, setState] = useState({ x: 0, y: 0, moving: false });
@@ -27,21 +30,23 @@ describe('useMoveData', () => {
       });
       return { ...state, moveOptions };
     });
-    expect(result.current.x).toEqual(0);
-    expect(result.current.y).toEqual(0);
-    expect(result.current.moving).toEqual(false);
+
+    expect(result.current.x).toBe(0);
+    expect(result.current.y).toBe(0);
+    expect(result.current.moving).toBeFalsy();
 
     const { moveOptions } = result.current;
     const moveData = new MoveDataGenerator(100, 100);
     act(() => {
       moveOptions.onMoveStart!(
         { type: 'pointerdown', stopPropagation() {} } as any,
-        moveData.get()
+        moveData.get(),
       );
     });
-    expect(result.current.x).toEqual(0);
-    expect(result.current.y).toEqual(0);
-    expect(result.current.moving).toEqual(true);
+
+    expect(result.current.x).toBe(0);
+    expect(result.current.y).toBe(0);
+    expect(result.current.moving).toBeTruthy();
 
     act(() => {
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());
@@ -50,17 +55,19 @@ describe('useMoveData', () => {
     act(() => {
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());
     });
-    expect(result.current.x).toEqual(50);
-    expect(result.current.y).toEqual(-25);
-    expect(result.current.moving).toEqual(true);
+
+    expect(result.current.x).toBe(50);
+    expect(result.current.y).toBe(-25);
+    expect(result.current.moving).toBeTruthy();
 
     moveData.next(170, 85);
     act(() => {
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());
       moveOptions.onMoveEnd!({ type: 'pointerup' } as any, moveData.get());
     });
-    expect(result.current.x).toEqual(70);
-    expect(result.current.y).toEqual(-15);
-    expect(result.current.moving).toEqual(false);
+
+    expect(result.current.x).toBe(70);
+    expect(result.current.y).toBe(-15);
+    expect(result.current.moving).toBeFalsy();
   });
 });

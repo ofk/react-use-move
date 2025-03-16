@@ -4,7 +4,7 @@ import { useIsomorphicLayoutEffect } from './useIsomorphicLayoutEffect';
 
 // see https://github.com/reactjs/rfcs/pull/220
 export function useEffectEvent<T extends ((...args: never[]) => unknown) | undefined>(
-  callback: T
+  callback: T,
 ): T {
   const ref = useRef<T | null>(null);
   useIsomorphicLayoutEffect(() => {

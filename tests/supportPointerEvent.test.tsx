@@ -1,10 +1,13 @@
-import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import type React from 'react';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { supportPointerEvent } from './supportPointerEvent';
 
 describe('supportPointerEvent', () => {
-  supportPointerEvent();
+  beforeAll(supportPointerEvent);
+
+  afterEach(cleanup);
 
   it('responds to pointer events', () => {
     const POINTER_EVENT_TEST_TESTID = 'pointer-event-test';
@@ -31,17 +34,22 @@ describe('supportPointerEvent', () => {
         data-testid={POINTER_EVENT_TEST_TESTID}
       >
         pointer event
-      </div>
+      </div>,
     ).getByTestId(POINTER_EVENT_TEST_TESTID);
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(events).toStrictEqual([{ type: 'pointerdown', pointerId: 1, screenX: 10, screenY: 40 }]);
+
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
+
     expect(events).toStrictEqual([
       { type: 'pointerdown', pointerId: 1, screenX: 10, screenY: 40 },
       { type: 'pointermove', pointerId: 1, screenX: 20, screenY: 30 },
     ]);
+
     fireEvent.pointerUp(el, { pointerId: 1 });
+
     expect(events).toStrictEqual([
       { type: 'pointerdown', pointerId: 1, screenX: 10, screenY: 40 },
       { type: 'pointermove', pointerId: 1, screenX: 20, screenY: 30 },

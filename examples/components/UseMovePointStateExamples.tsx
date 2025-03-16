@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 
 import { useMove, useMovePointState } from '../../src';
 import { toContentPoint } from '../utils';
@@ -15,7 +16,7 @@ const getStateStyle = ({
   ...(colorInvert ? { backgroundColor: 'black', color: 'white' } : {}),
 });
 
-const SimpleDrag: React.FC = () => {
+function SimpleDrag(): React.ReactElement {
   const {
     moveOptions,
     moving: dragging,
@@ -49,9 +50,9 @@ const SimpleDrag: React.FC = () => {
       </DragItem>
     </DragContainer>
   );
-};
+}
 
-const NestingDrag: React.FC = () => {
+function NestingDrag(): React.ReactElement {
   const {
     moveOptions: parentMoveOptions,
     moving: unuseParentMoving,
@@ -154,9 +155,9 @@ const NestingDrag: React.FC = () => {
       </div>
     </>
   );
-};
+}
 
-const SVGDrag: React.FC = () => {
+function SVGDrag(): React.ReactElement {
   const {
     moveOptions,
     moving: dragging,
@@ -170,7 +171,7 @@ const SVGDrag: React.FC = () => {
       const contentPoint = toContentPoint({ x: moveData.clientX, y: moveData.clientY }, elem);
       const lastContentPoint = toContentPoint(
         { x: moveData.lastClientX, y: moveData.lastClientY },
-        elem
+        elem,
       );
       const movementX = contentPoint.x - lastContentPoint.x;
       const movementY = contentPoint.y - lastContentPoint.y;
@@ -201,15 +202,17 @@ const SVGDrag: React.FC = () => {
       </svg>
     </svg>
   );
-};
+}
 
-export const UseMovePointStateExamples: React.FC = () => (
-  <div>
-    <h3>Simple drag</h3>
-    <SimpleDrag />
-    <h3>Nesting drag</h3>
-    <NestingDrag />
-    <h2>SVG drag</h2>
-    <SVGDrag />
-  </div>
-);
+export function UseMovePointStateExamples(): React.ReactElement {
+  return (
+    <div>
+      <h3>Simple drag</h3>
+      <SimpleDrag />
+      <h3>Nesting drag</h3>
+      <NestingDrag />
+      <h2>SVG drag</h2>
+      <SVGDrag />
+    </div>
+  );
+}

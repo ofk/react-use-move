@@ -1,6 +1,6 @@
 {
   "name": "react-use-move",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "React hook for move interaction by pointer event",
   "license": "MIT",
   "author": "ofk <ofkjpn+npm@gmail.com> (https://github.com/ofk/)",

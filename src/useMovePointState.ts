@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import type { MoveData, MoveOptions } from './useMove';
+
 import { useMoveData } from './useMoveData';
 
 interface Point {
@@ -9,40 +10,40 @@ interface Point {
 }
 
 interface MovePointData extends MoveData {
-  startX: number;
-  startY: number;
   lastX: number;
   lastY: number;
+  startX: number;
+  startY: number;
 }
 
 export interface MovePointStateOptions<E extends Element = Element> {
-  // Initial coordinate.
-  x?: number;
-  y?: number;
-  // Minimum coordinate.
-  minX?: number;
-  minY?: number;
+  // Function to round coordinate.
+  clampPoint?: (data: Readonly<Point>) => Point;
   // Maximum coordinate.
   maxX?: number;
   maxY?: number;
-  // Function to round coordinate.
-  clampPoint?: (data: Readonly<Point>) => Point;
-  // Function to convert from drag operation to coordinate.
-  toPoint?: (data: Readonly<MovePointData>, evt: React.PointerEvent<E>) => Point;
+  // Minimum coordinate.
+  minX?: number;
+  minY?: number;
   // Handler that is called when a coordinate changes.
   onChange?: (evt: React.PointerEvent<E>, data: Readonly<Point>) => void;
+  // Function to convert from drag operation to coordinate.
+  toPoint?: (data: Readonly<MovePointData>, evt: React.PointerEvent<E>) => Point;
+  // Initial coordinate.
+  x?: number;
+  y?: number;
 }
 
 export interface MovePointStateResult<E extends Element = Element> {
-  // Current coordinate.
-  x: number;
-  y: number;
+  // Options given to useMove.
+  moveOptions: MoveOptions<E>;
   // Moving status.
   moving: boolean;
   // Function to update coordinate.
   setPoint: React.Dispatch<React.SetStateAction<Point>>;
-  // Options given to useMove.
-  moveOptions: MoveOptions<E>;
+  // Current coordinate.
+  x: number;
+  y: number;
 }
 
 function defaultClampPoint(data: Readonly<Point>): Point {
@@ -50,20 +51,20 @@ function defaultClampPoint(data: Readonly<Point>): Point {
 }
 
 function defaultPointConverter(data: Readonly<MovePointData>): Point {
-  const { startX, startY, clientX, clientY, startClientX, startClientY } = data;
+  const { clientX, clientY, startClientX, startClientY, startX, startY } = data;
   return { x: startX + clientX - startClientX, y: startY + clientY - startClientY };
 }
 
 export function useMovePointState<E extends Element = Element>({
-  x = 0,
-  y = 0,
-  minX = -Infinity,
-  minY = -Infinity,
+  clampPoint: customClampPoint = defaultClampPoint,
   maxX = Infinity,
   maxY = Infinity,
-  clampPoint: customClampPoint = defaultClampPoint,
-  toPoint = defaultPointConverter,
+  minX = -Infinity,
+  minY = -Infinity,
   onChange,
+  toPoint = defaultPointConverter,
+  x = 0,
+  y = 0,
 }: MovePointStateOptions<E> = {}): MovePointStateResult<E> {
   const [point, setRawPoint] = useState({ x, y });
   const [moving, setMoving] = useState(false);
@@ -89,25 +90,6 @@ export function useMovePointState<E extends Element = Element>({
 
   const { moveOptions } = useMoveData<Point, E>({
     data: point,
-    toData({ startData, lastData, ...moveData }, evt) {
-      return clampPoint(
-        toPoint(
-          {
-            startX: startData.x,
-            startY: startData.y,
-            lastX: lastData.x,
-            lastY: lastData.y,
-            ...moveData,
-          },
-          evt,
-        ),
-      );
-    },
-    onMoveStart(evt, data): void {
-      onChange?.(evt, data);
-      setPoint(data);
-      setMoving(true);
-    },
     onMove(evt, data): void {
       onChange?.(evt, data);
       setPoint(data);
@@ -117,7 +99,26 @@ export function useMovePointState<E extends Element = Element>({
       setPoint(data);
       setMoving(false);
     },
+    onMoveStart(evt, data): void {
+      onChange?.(evt, data);
+      setPoint(data);
+      setMoving(true);
+    },
+    toData({ lastData, startData, ...moveData }, evt) {
+      return clampPoint(
+        toPoint(
+          {
+            lastX: lastData.x,
+            lastY: lastData.y,
+            startX: startData.x,
+            startY: startData.y,
+            ...moveData,
+          },
+          evt,
+        ),
+      );
+    },
   });
 
-  return { ...point, moving, setPoint, moveOptions };
+  return { ...point, moveOptions, moving, setPoint };
 }

@@ -1,4 +1,5 @@
 import type React from 'react';
+
 import { useMemo, useRef } from 'react';
 
 import { useEffectEvent } from './useEffectEvent';
@@ -6,19 +7,19 @@ import { useEffectEvent } from './useEffectEvent';
 interface PartialPointerEvent<E extends Element = Element>
   extends Pick<
     React.PointerEvent<E>,
-    'pointerId' | 'screenX' | 'screenY' | 'clientX' | 'clientY'
+    'clientX' | 'clientY' | 'pointerId' | 'screenX' | 'screenY'
   > {}
 
 export interface MoveData {
-  type: 'movestart' | 'move' | 'moveend' | 'trace' | 'click';
-  movementX: number;
-  movementY: number;
   clientX: number;
   clientY: number;
-  startClientX: number;
-  startClientY: number;
   lastClientX: number;
   lastClientY: number;
+  movementX: number;
+  movementY: number;
+  startClientX: number;
+  startClientY: number;
+  type: 'click' | 'move' | 'moveend' | 'movestart' | 'trace';
 }
 
 export type MoveEventHandler<E extends Element = Element> = (
@@ -35,36 +36,36 @@ export type MoveStopHandler<E extends Element = Element> = (evt: React.PointerEv
 export type MoveNoticeEventHandler<E extends Element = Element> = React.PointerEventHandler<E>;
 
 export interface MoveOptions<E extends Element = Element> {
-  // Handler that is called when a move interaction starts.
-  onMoveStart?: MoveEventHandler<E>;
+  // The max number of pixels a user can shift the mouse pointer during a click for it to be considered a valid click (as opposed to a mouse drag).
+  clickTolerance?: number;
+  moveFinish?: MoveNoticeEventHandler<E>;
+  // Callbacks called before and after the move interaction. Used to control the mouse cursor.
+  movePrepare?: MoveNoticeEventHandler<E>;
+  moveStop?: MoveStopHandler<E>;
+  // Condition to inhibit move interaction. For example, right drag can be prohibited.
+  moveStopButton?: MoveStopButtonHandler<E>;
   // Handler that is called when the element is moved.
   onMove?: MoveEventHandler<E>;
   // Handler that is called when a move interaction ends.
   onMoveEnd?: MoveEventHandler<E>;
+  // Handler that is called when a move interaction starts.
+  onMoveStart?: MoveEventHandler<E>;
+  // Handler that is called when the pointer is clicked. When this handler is called, no move interaction occurs.
+  onPureClick?: MoveEventHandler<E>;
   // Handler that is called when the pointer is moved. In other words, this is onPointerMove that can be used together.
   onTraceMove?: MoveEventHandler<E>;
   onTraceMoveCapture?: MoveEventHandler<E>;
-  // Handler that is called when the pointer is clicked. When this handler is called, no move interaction occurs.
-  onPureClick?: MoveEventHandler<E>;
-  // The max number of pixels a user can shift the mouse pointer during a click for it to be considered a valid click (as opposed to a mouse drag).
-  clickTolerance?: number;
-  // Condition to inhibit move interaction. For example, right drag can be prohibited.
-  moveStopButton?: MoveStopButtonHandler<E>;
-  moveStop?: MoveStopHandler<E>;
-  // Callbacks called before and after the move interaction. Used to control the mouse cursor.
-  movePrepare?: MoveNoticeEventHandler<E>;
-  moveFinish?: MoveNoticeEventHandler<E>;
 }
 
 export interface MoveProps<E extends Element = Element> {
-  onPointerDownCapture?: React.PointerEventHandler<E>;
-  onPointerDown?: React.PointerEventHandler<E>;
-  onPointerMoveCapture?: React.PointerEventHandler<E>;
-  onPointerMove?: React.PointerEventHandler<E>;
-  onPointerUpCapture?: React.PointerEventHandler<E>;
-  onPointerUp?: React.PointerEventHandler<E>;
-  onPointerCancelCapture?: React.PointerEventHandler<E>;
   onPointerCancel?: React.PointerEventHandler<E>;
+  onPointerCancelCapture?: React.PointerEventHandler<E>;
+  onPointerDown?: React.PointerEventHandler<E>;
+  onPointerDownCapture?: React.PointerEventHandler<E>;
+  onPointerMove?: React.PointerEventHandler<E>;
+  onPointerMoveCapture?: React.PointerEventHandler<E>;
+  onPointerUp?: React.PointerEventHandler<E>;
+  onPointerUpCapture?: React.PointerEventHandler<E>;
 }
 
 export interface MoveResult<E extends Element = Element> {
@@ -73,13 +74,13 @@ export interface MoveResult<E extends Element = Element> {
 }
 
 function createPartialPointerEvent<E extends Element = Element>({
+  clientX,
+  clientY,
   pointerId,
   screenX,
   screenY,
-  clientX,
-  clientY,
 }: React.PointerEvent<E>): PartialPointerEvent<E> {
-  return { pointerId, screenX, screenY, clientX, clientY };
+  return { clientX, clientY, pointerId, screenX, screenY };
 }
 
 function createMoveData<E extends Element = Element>(
@@ -89,15 +90,15 @@ function createMoveData<E extends Element = Element>(
   lastEvt: PartialPointerEvent<E>,
 ): MoveData {
   return {
-    type,
-    movementX: evt.screenX - lastEvt.screenX,
-    movementY: evt.screenY - lastEvt.screenY,
     clientX: evt.clientX,
     clientY: evt.clientY,
-    startClientX: startEvt.clientX,
-    startClientY: startEvt.clientY,
     lastClientX: lastEvt.clientX,
     lastClientY: lastEvt.clientY,
+    movementX: evt.screenX - lastEvt.screenX,
+    movementY: evt.screenY - lastEvt.screenY,
+    startClientX: startEvt.clientX,
+    startClientY: startEvt.clientY,
+    type,
   };
 }
 
@@ -135,38 +136,38 @@ const warnToCallStopPropagation = <
   }) as F;
 
 export function useMove<E extends Element = Element>({
-  moveStopButton: rawMoveStopButton = defaultMoveStopButton,
-  moveStop: rawMoveStop = defaultMoveStop,
-  movePrepare: rawMovePrepare = defaultMovePrepare,
+  clickTolerance,
   moveFinish: rawMoveFinish = defaultMoveFinish,
-  onMoveStart: rawOnMoveStart,
+  movePrepare: rawMovePrepare = defaultMovePrepare,
+  moveStop: rawMoveStop = defaultMoveStop,
+  moveStopButton: rawMoveStopButton = defaultMoveStopButton,
   onMove: rawOnMove,
   onMoveEnd: rawOnMoveEnd,
-  onTraceMoveCapture: rawOnTraceMoveCapture,
-  onTraceMove: rawOnTraceMove,
+  onMoveStart: rawOnMoveStart,
   onPureClick: rawOnPureClick,
-  clickTolerance,
+  onTraceMove: rawOnTraceMove,
+  onTraceMoveCapture: rawOnTraceMoveCapture,
 }: MoveOptions<E>): MoveResult<E> {
   const DEV = process.env.NODE_ENV !== 'production';
 
   const state = useRef<{
-    pointerDowned: boolean;
-    moveStopped: boolean;
-    moveStarted: boolean;
-    movePropagationStopped: boolean;
-    startEvent: PartialPointerEvent<E> | null;
     lastEvent: PartialPointerEvent<E> | null;
     lastMoveCaptureEvent: PartialPointerEvent<E> | null;
     lastMoveEvent: PartialPointerEvent<E> | null;
+    movePropagationStopped: boolean;
+    moveStarted: boolean;
+    moveStopped: boolean;
+    pointerDowned: boolean;
+    startEvent: PartialPointerEvent<E> | null;
   }>({
-    pointerDowned: false,
-    moveStopped: false,
-    moveStarted: false,
-    movePropagationStopped: false,
-    startEvent: null,
     lastEvent: null,
     lastMoveCaptureEvent: null,
     lastMoveEvent: null,
+    movePropagationStopped: false,
+    moveStarted: false,
+    moveStopped: false,
+    pointerDowned: false,
+    startEvent: null,
   });
 
   const moveStopButton = useEffectEvent(rawMoveStopButton);
@@ -294,12 +295,12 @@ export function useMove<E extends Element = Element>({
       ...(onTraceMoveCapture ? { onPointerMoveCapture } : {}),
       ...(onMoveStart || onMove || onMoveEnd || onTraceMove || onPureClick
         ? {
+            onPointerCancel: onPointerUp,
+            onPointerCancelCapture: onPointerUpCapture,
             onPointerDownCapture,
             onPointerMove,
-            onPointerUpCapture,
             onPointerUp,
-            onPointerCancelCapture: onPointerUpCapture,
-            onPointerCancel: onPointerUp,
+            onPointerUpCapture,
           }
         : {}),
       ...(onMoveStart && !onPureClick && !clickTolerance ? { onPointerDown } : {}),

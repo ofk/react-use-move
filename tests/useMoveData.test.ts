@@ -11,22 +11,22 @@ describe('useMoveData', () => {
 
   it('can move with point', () => {
     const { result } = renderHook(() => {
-      const [state, setState] = useState({ x: 0, y: 0, moving: false });
+      const [state, setState] = useState({ moving: false, x: 0, y: 0 });
       const { moveOptions } = useMoveData({
         data: { x: state.x, y: state.y },
-        toData: ({ lastData, movementX, movementY }) => ({
-          x: lastData.x + movementX,
-          y: lastData.y + movementY,
-        }),
-        onMoveStart: (_evt, data) => {
-          setState({ ...data, moving: true });
-        },
         onMove: (_evt, data) => {
           setState({ ...data, moving: true });
         },
         onMoveEnd: (_evt, data) => {
           setState({ ...data, moving: false });
         },
+        onMoveStart: (_evt, data) => {
+          setState({ ...data, moving: true });
+        },
+        toData: ({ lastData, movementX, movementY }) => ({
+          x: lastData.x + movementX,
+          y: lastData.y + movementY,
+        }),
       });
       return { ...state, moveOptions };
     });
@@ -39,7 +39,7 @@ describe('useMoveData', () => {
     const moveData = new MoveDataGenerator(100, 100);
     act(() => {
       moveOptions.onMoveStart!(
-        { type: 'pointerdown', stopPropagation() {} } as any,
+        { stopPropagation() {}, type: 'pointerdown' } as any,
         moveData.get(),
       );
     });

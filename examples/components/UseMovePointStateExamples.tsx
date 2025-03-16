@@ -1,4 +1,5 @@
 import type React from 'react';
+
 import { useState } from 'react';
 
 import { useMove, useMovePointState } from '../../src';
@@ -6,11 +7,11 @@ import { toContentPoint } from '../utils';
 import { DragContainer, DragItem } from './DragElements';
 
 const getStateStyle = ({
-  dragging,
   colorInvert,
+  dragging,
 }: {
-  dragging?: boolean;
   colorInvert?: boolean;
+  dragging?: boolean;
 }): React.CSSProperties => ({
   ...(dragging ? { borderColor: 'red' } : {}),
   ...(colorInvert ? { backgroundColor: 'black', color: 'white' } : {}),
@@ -26,10 +27,10 @@ function SimpleDrag(): React.ReactElement {
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
     ...moveOptions,
+    clickTolerance: 10,
     onPureClick() {
       setColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const {
@@ -42,7 +43,7 @@ function SimpleDrag(): React.ReactElement {
 
   return (
     <DragContainer height={200} style={{ backgroundColor: 'lightblue', overflow: 'hidden' }}>
-      <DragItem {...coord} style={getStateStyle({ dragging, colorInvert })} {...moveProps}>
+      <DragItem {...coord} style={getStateStyle({ colorInvert, dragging })} {...moveProps}>
         drag click
       </DragItem>
       <DragItem {...dragCoord} style={getStateStyle({ dragging: dragDragging })} {...dragMoveProps}>
@@ -62,11 +63,11 @@ function NestingDrag(): React.ReactElement {
   const [parentColorInvert, setParentColorInvert] = useState(false);
   const { moveProps: parentMoveProps } = useMove({
     ...parentMoveOptions,
+    clickTolerance: 10,
     onPureClick(evt) {
       evt.stopPropagation();
       setParentColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const {
@@ -78,6 +79,7 @@ function NestingDrag(): React.ReactElement {
   const [colorInvert, setColorInvert] = useState(false);
   const { moveProps } = useMove({
     ...moveOptions,
+    clickTolerance: 10,
     moveStop(evt) {
       return evt.ctrlKey || evt.metaKey;
     },
@@ -85,7 +87,6 @@ function NestingDrag(): React.ReactElement {
       evt.stopPropagation();
       setColorInvert((invert) => !invert);
     },
-    clickTolerance: 10,
   });
 
   const {
@@ -117,16 +118,16 @@ function NestingDrag(): React.ReactElement {
       <DragContainer style={{ backgroundColor: 'lightgray', overflow: 'hidden' }}>
         <DragItem
           {...parentCoord}
-          width={400}
           height={200}
           style={{
             backgroundColor: parentColorInvert ? 'lightpink' : 'lightblue',
             border: undefined,
           }}
+          width={400}
           {...parentMoveProps}
         >
-          <DragContainer width={400} height={200}>
-            <DragItem {...coord} style={getStateStyle({ dragging, colorInvert })} {...moveProps}>
+          <DragContainer height={200} width={400}>
+            <DragItem {...coord} style={getStateStyle({ colorInvert, dragging })} {...moveProps}>
               drag click
             </DragItem>
             <DragItem
@@ -139,12 +140,12 @@ function NestingDrag(): React.ReactElement {
             <DragItem {...otherCoord}>other drag</DragItem>
             <DragItem
               {...otherDraggingCoord}
-              width={50}
               height={50}
               style={{
                 backgroundColor: undefined,
                 color: otherDragging ? 'red' : undefined,
               }}
+              width={50}
               {...otherDraggingMoveProps}
             />
           </DragContainer>
@@ -164,8 +165,6 @@ function SVGDrag(): React.ReactElement {
     setPoint: setCoord,
     ...coord
   } = useMovePointState({
-    x: 0,
-    y: 0,
     toPoint(moveData, evt) {
       const elem = evt.currentTarget as SVGGraphicsElement;
       const contentPoint = toContentPoint({ x: moveData.clientX, y: moveData.clientY }, elem);
@@ -177,26 +176,28 @@ function SVGDrag(): React.ReactElement {
       const movementY = contentPoint.y - lastContentPoint.y;
       return { x: moveData.lastX + movementX, y: moveData.lastY + movementY };
     },
+    x: 0,
+    y: 0,
   });
   const { moveProps } = useMove(moveOptions);
 
   return (
     <svg
+      height="300"
+      style={{ backgroundColor: 'lightgray' }}
+      viewBox="0 0 500 300"
+      width="500"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      width="500"
-      height="300"
-      viewBox="0 0 500 300"
-      style={{ backgroundColor: 'lightgray' }}
     >
-      <svg x="50" y="50" width="400" height="200" viewBox="0 0 80 40" overflow="visible">
-        <rect x="0" y="0" width="80" height="40" fill="lightblue" />
+      <svg height="200" overflow="visible" viewBox="0 0 80 40" width="400" x="50" y="50">
+        <rect fill="lightblue" height="40" width="80" x="0" y="0" />
         <rect
           {...coord}
-          width="10"
-          height="10"
           fill="white"
+          height="10"
           stroke={dragging ? 'red' : 'black'}
+          width="10"
           {...moveProps}
         />
       </svg>

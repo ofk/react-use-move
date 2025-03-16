@@ -25,15 +25,15 @@ export class MoveDataGenerator {
 
   get(): MoveData {
     const data = {
-      type: 'trace' as const,
-      movementX: this.currentCoord.x - this.lastCoord.x,
-      movementY: this.currentCoord.y - this.lastCoord.y,
       clientX: this.currentCoord.x,
       clientY: this.currentCoord.y,
-      startClientX: this.startCoord.x,
-      startClientY: this.startCoord.y,
       lastClientX: this.lastCoord.x,
       lastClientY: this.lastCoord.y,
+      movementX: this.currentCoord.x - this.lastCoord.x,
+      movementY: this.currentCoord.y - this.lastCoord.y,
+      startClientX: this.startCoord.x,
+      startClientY: this.startCoord.y,
+      type: 'trace' as const,
     };
     this.next(this.currentCoord.x, this.currentCoord.y);
     return data;

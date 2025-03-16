@@ -1,21 +1,21 @@
 interface DragContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  width?: number;
   height?: number;
+  width?: number;
 }
 
 export function DragContainer({
-  width = 500,
   height = 300,
   style,
+  width = 500,
   ...props
 }: DragContainerProps): React.ReactElement {
   return (
     <div
       style={{
         boxSizing: 'border-box',
+        height: `${String(height)}px`,
         position: 'relative',
         width: `${String(width)}px`,
-        height: `${String(height)}px`,
         ...style,
       }}
       {...props}
@@ -24,32 +24,32 @@ export function DragContainer({
 }
 
 interface DragItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  height?: number;
+  width?: number;
   x?: number;
   y?: number;
-  width?: number;
-  height?: number;
 }
 
 export function DragItem({
-  x = 0,
-  y = 0,
-  width = 50,
   height = 50,
   style,
+  width = 50,
+  x = 0,
+  y = 0,
   ...props
 }: DragItemProps): React.ReactElement {
   return (
     <div
       style={{
-        boxSizing: 'border-box',
-        position: 'absolute',
-        width: `${String(width)}px`,
-        height: `${String(height)}px`,
-        top: `${String(y)}px`,
-        left: `${String(x)}px`,
         backgroundColor: 'white',
-        borderWidth: '1px',
         borderStyle: 'solid',
+        borderWidth: '1px',
+        boxSizing: 'border-box',
+        height: `${String(height)}px`,
+        left: `${String(x)}px`,
+        position: 'absolute',
+        top: `${String(y)}px`,
+        width: `${String(width)}px`,
         ...style,
       }}
       {...props}

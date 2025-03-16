@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import React from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import type React from 'react';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { useMove } from '../src/useMove';
 import { supportPointerEvent } from './supportPointerEvent';
@@ -24,7 +24,12 @@ function MoveTest({
   );
 }
 
-type Result = { name: string; type: string; movementX?: number; movementY?: number };
+interface Result {
+  name: string;
+  type: string;
+  movementX?: number;
+  movementY?: number;
+}
 
 const createResults = () => {
   const results: Result[] = [];
@@ -46,8 +51,9 @@ const createResults = () => {
 };
 
 describe('useMove with move and click options', () => {
+  beforeAll(supportPointerEvent);
+
   afterEach(cleanup);
-  supportPointerEvent();
 
   const createMoveTest = () => {
     const { results, addResult, clearResults } = createResults();
@@ -70,20 +76,24 @@ describe('useMove with move and click options', () => {
     const { el, results } = createMoveTest();
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([]);
 
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
     ]);
 
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
     ]);
 
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
@@ -93,6 +103,7 @@ describe('useMove with move and click options', () => {
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 30, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 20 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 20 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
@@ -106,20 +117,24 @@ describe('useMove with move and click options', () => {
     const { el, results } = createMoveTest();
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([]);
 
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
     ]);
 
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
     ]);
 
     fireEvent.pointerCancel(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
@@ -132,6 +147,7 @@ describe('useMove with move and click options', () => {
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 0, movementY: 0 },
     ]);
@@ -141,6 +157,7 @@ describe('useMove with move and click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 40 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 1, movementY: 1 },
     ]);
@@ -153,6 +170,7 @@ describe('useMove with move and click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30, button: 2 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
+
     expect(results).toStrictEqual([]);
 
     clearResults();
@@ -160,6 +178,7 @@ describe('useMove with move and click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 40, button: 2 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41, button: 2 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41, button: 2 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 1, movementY: 1 },
     ]);
@@ -172,6 +191,7 @@ describe('useMove with move and click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30, ctrlKey: true });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25, ctrlKey: true });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25, ctrlKey: true });
+
     expect(results).toStrictEqual([]);
 
     clearResults();
@@ -179,6 +199,7 @@ describe('useMove with move and click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 40, ctrlKey: true });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41, ctrlKey: true });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41, ctrlKey: true });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 1, movementY: 1 },
     ]);
@@ -186,8 +207,9 @@ describe('useMove with move and click options', () => {
 });
 
 describe('useMove with move options', () => {
+  beforeAll(supportPointerEvent);
+
   afterEach(cleanup);
-  supportPointerEvent();
 
   const createMoveTest = () => {
     const { results, addResult, clearResults } = createResults();
@@ -210,6 +232,7 @@ describe('useMove with move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointerdown', movementX: 0, movementY: 0 },
       { name: 'move', type: 'pointermove', movementX: 10, movementY: -10 },
@@ -223,6 +246,7 @@ describe('useMove with move options', () => {
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointerdown', movementX: 0, movementY: 0 },
       { name: 'end', type: 'pointerup', movementX: 0, movementY: 0 },
@@ -233,6 +257,7 @@ describe('useMove with move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 40 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointerdown', movementX: 0, movementY: 0 },
       { name: 'move', type: 'pointermove', movementX: 1, movementY: 0 },
@@ -248,13 +273,15 @@ describe('useMove with move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30, button: 2 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
+
     expect(results).toStrictEqual([]);
   });
 });
 
 describe('useMove with click options', () => {
+  beforeAll(supportPointerEvent);
+
   afterEach(cleanup);
-  supportPointerEvent();
 
   const createMoveTest = () => {
     const { results, addResult, clearResults } = createResults();
@@ -273,6 +300,7 @@ describe('useMove with click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([]);
   });
 
@@ -281,6 +309,7 @@ describe('useMove with click options', () => {
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 0, movementY: 0 },
     ]);
@@ -290,6 +319,7 @@ describe('useMove with click options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 40 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 1, movementY: 1 },
     ]);
@@ -297,8 +327,9 @@ describe('useMove with click options', () => {
 });
 
 describe('useMove with move and pure move options', () => {
+  beforeAll(supportPointerEvent);
+
   afterEach(cleanup);
-  supportPointerEvent();
 
   const createMoveTest = () => {
     const { results, addResult, clearResults } = createResults();
@@ -326,6 +357,7 @@ describe('useMove with move and pure move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'prepare', type: 'pointerdown' },
       { name: 'trace-cap', type: 'pointermove', movementX: 0, movementY: 0 },
@@ -346,6 +378,7 @@ describe('useMove with move and pure move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30, button: 2 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25, button: 2 });
+
     expect(results).toStrictEqual([
       { name: 'trace-cap', type: 'pointermove', movementX: 0, movementY: 0 },
       { name: 'trace', type: 'pointermove', movementX: 0, movementY: 0 },
@@ -360,6 +393,7 @@ describe('useMove with move and pure move options', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'trace-cap', type: 'pointermove', movementX: 0, movementY: 0 },
       { name: 'trace', type: 'pointermove', movementX: 0, movementY: 0 },
@@ -372,8 +406,9 @@ describe('useMove with move and pure move options', () => {
 });
 
 describe('useMove with move options wrap movable parent', () => {
+  beforeAll(supportPointerEvent);
+
   afterEach(cleanup);
-  supportPointerEvent();
 
   const createMoveTest = () => {
     const { results, addResult, clearResults } = createResults();
@@ -407,6 +442,7 @@ describe('useMove with move options wrap movable parent', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'move', type: 'pointermove', movementX: 5, movementY: -5 },
@@ -421,6 +457,7 @@ describe('useMove with move options wrap movable parent', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30, ctrlKey: true });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25, ctrlKey: true });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25, ctrlKey: true });
+
     expect(results).toStrictEqual([
       { name: 'parent-start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'parent-move', type: 'pointermove', movementX: 5, movementY: -5 },
@@ -433,6 +470,7 @@ describe('useMove with move options wrap movable parent', () => {
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 0, movementY: 0 },
       { name: 'parent-click', type: 'pointerup', movementX: 0, movementY: 0 },
@@ -443,6 +481,7 @@ describe('useMove with move options wrap movable parent', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 40 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 11, screenY: 41 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 11, screenY: 41 });
+
     expect(results).toStrictEqual([
       { name: 'click', type: 'pointerup', movementX: 1, movementY: 1 },
       { name: 'parent-click', type: 'pointerup', movementX: 1, movementY: 1 },
@@ -451,8 +490,9 @@ describe('useMove with move options wrap movable parent', () => {
 });
 
 describe('useMove with no options wrap movable parent', () => {
+  beforeAll(supportPointerEvent);
+
   afterEach(cleanup);
-  supportPointerEvent();
 
   const createMoveTest = () => {
     const { results, addResult, clearResults } = createResults();
@@ -477,6 +517,7 @@ describe('useMove with no options wrap movable parent', () => {
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 20, screenY: 30 });
     fireEvent.pointerMove(el, { pointerId: 1, screenX: 25, screenY: 25 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 25, screenY: 25 });
+
     expect(results).toStrictEqual([
       { name: 'parent-start', type: 'pointermove', movementX: 10, movementY: -10 },
       { name: 'parent-move', type: 'pointermove', movementX: 5, movementY: -5 },
@@ -489,6 +530,7 @@ describe('useMove with no options wrap movable parent', () => {
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });
     fireEvent.pointerUp(el, { pointerId: 1, screenX: 10, screenY: 40 });
+
     expect(results).toStrictEqual([
       { name: 'parent-click', type: 'pointerup', movementX: 0, movementY: 0 },
     ]);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import type { MoveEventHandler } from '../../src';
 import { useMove } from '../../src';
@@ -16,7 +16,7 @@ const getStateStyle = ({
   ...(colorInvert ? { backgroundColor: 'black', color: 'white' } : {}),
 });
 
-const SimpleDrag: React.FC = () => {
+function SimpleDrag(): React.ReactElement {
   const [coord, setCoord] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [colorInvert, setColorInvert] = useState(false);
@@ -78,9 +78,9 @@ const SimpleDrag: React.FC = () => {
       </DragItem>
     </DragContainer>
   );
-};
+}
 
-const NestingDrag: React.FC = () => {
+function NestingDrag(): React.ReactElement {
   const [parentCoord, setParentCoord] = useState({ x: 50, y: 50 });
   const [parentColorInvert, setParentColorInvert] = useState(false);
   const { moveProps: parentMoveProps } = useMove({
@@ -227,9 +227,9 @@ const NestingDrag: React.FC = () => {
       </div>
     </>
   );
-};
+}
 
-const SVGDrag: React.FC = () => {
+function SVGDrag(): React.ReactElement {
   const [coord, setCoord] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const onMove: MoveEventHandler = (evt, moveData) => {
@@ -237,7 +237,7 @@ const SVGDrag: React.FC = () => {
     const contentPoint = toContentPoint({ x: moveData.clientX, y: moveData.clientY }, elem);
     const lastContentPoint = toContentPoint(
       { x: moveData.lastClientX, y: moveData.lastClientY },
-      elem
+      elem,
     );
     const movementX = contentPoint.x - lastContentPoint.x;
     const movementY = contentPoint.y - lastContentPoint.y;
@@ -275,15 +275,17 @@ const SVGDrag: React.FC = () => {
       </svg>
     </svg>
   );
-};
+}
 
-export const UseMoveExamples: React.FC = () => (
-  <div>
-    <h3>Simple drag</h3>
-    <SimpleDrag />
-    <h3>Nesting drag</h3>
-    <NestingDrag />
-    <h2>SVG drag</h2>
-    <SVGDrag />
-  </div>
-);
+export function UseMoveExamples(): React.ReactElement {
+  return (
+    <div>
+      <h3>Simple drag</h3>
+      <SimpleDrag />
+      <h3>Nesting drag</h3>
+      <NestingDrag />
+      <h2>SVG drag</h2>
+      <SVGDrag />
+    </div>
+  );
+}

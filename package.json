@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "ofk <ofkjpn+npm@gmail.com> (https://github.com/ofk/)",
   "repository": "ofk/react-use-move",
+  "type": "module",
   "main": "dist/index.js",
   "files": [
     "dist",
@@ -14,18 +15,19 @@
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig.build.json",
     "dev": "vite",
-    "fix": "npm-run-all -p fix:** -s prettier:fix",
-    "fix:eslint": "npm run lint:eslint -- --fix",
-    "fix:package-json": "prettier-package-json --write",
-    "lint": "run-p lint:** prettier:lint",
-    "lint:eslint": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "lint:package-json": "prettier-package-json -l",
+    "lint": "run-s lint:**",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier --check .",
+    "lint:prettier-package-json": "prettier-package-json --list-different",
     "lint:tsc": "tsc",
+    "lint-fix": "run-s lint-fix:**",
+    "lint-fix:eslint": "eslint --fix .",
+    "lint-fix:prettier": "prettier --write .",
+    "lint-fix:prettier-package-json": "prettier-package-json --write",
+    "lint-fix:tsc": "npm run lint:tsc",
     "prepare": "husky install",
     "prepublishOnly": "npm run build",
-    "test": "vitest run",
-    "prettier:fix": "npm run prettier:lint -- --write",
-    "prettier:lint": "prettier . --check"
+    "test": "vitest run"
   },
   "types": "dist/index.d.ts",
   "peerDependencies": {
@@ -51,11 +53,14 @@
   },
   "keywords": [],
   "lint-staged": {
-    "package.json": "prettier-package-json --write",
-    "*.{md,json,html}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix --ext .js,.jsx,.ts,.tsx",
-      "prettier --write"
+    "package.json": [
+      "prettier --write",
+      "prettier-package-json --write"
+    ],
+    "*.{js,jsx,mjs,cjs,json,md,html}": "prettier --write",
+    "*.{ts,tsx,mts,cts}": [
+      "prettier --write",
+      "eslint --fix"
     ]
   },
   "packageManager": "npm@10.8.0+sha512.c21f77b91733829ec70e73cc88b5dc0a4bf685a81d252d3327d293ff7d5dd05a173f4dbeaa037600ec29696f397f14569229e5dab10b7cfc3e0a30575b8f3f8d"

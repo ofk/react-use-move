@@ -5,7 +5,7 @@ import type { MoveOptions } from './useMove';
 
 export type ExtendMoveDataEventHandler<D, F extends (...args: never[]) => unknown> = (
   evt: Parameters<F>[0],
-  data: Readonly<D>
+  data: Readonly<D>,
 ) => ReturnType<F>;
 
 export type ExtendMoveOptions<
@@ -14,7 +14,7 @@ export type ExtendMoveOptions<
     onMoveStart?: (...args: never[]) => void;
     onMove?: (...args: never[]) => void;
     onMoveEnd?: (...args: never[]) => void;
-  } = MoveOptions
+  } = MoveOptions,
 > = Omit<O, 'onMoveStart' | 'onMove' | 'onMoveEnd'> & {
   onMoveStart?: ExtendMoveDataEventHandler<D, NonNullable<O['onMoveStart']>>;
   onMove?: ExtendMoveDataEventHandler<D, NonNullable<O['onMove']>>;
@@ -23,7 +23,7 @@ export type ExtendMoveOptions<
 
 export type ExtendMoveDataConverter<D, F extends (...args: never[]) => unknown> = (
   data: Readonly<{ startData: Readonly<D>; lastData: Readonly<D> } & Parameters<F>[1]>,
-  evt: Parameters<F>[0]
+  evt: Parameters<F>[0],
 ) => D;
 
 export interface MoveDataOptions<D, E extends Element = Element>
@@ -92,7 +92,7 @@ export function useMoveData<D, E extends Element = Element>({
                   ...moveData,
                 },
                 /* eslint-enable @typescript-eslint/no-non-null-assertion */
-                evt
+                evt,
               );
               state.current.lastData = lastData;
               onMove?.(evt, lastData);
@@ -106,7 +106,7 @@ export function useMoveData<D, E extends Element = Element>({
                   ...moveData,
                 },
                 /* eslint-enable @typescript-eslint/no-non-null-assertion */
-                evt
+                evt,
               );
               state.current.startData = null;
               state.current.lastData = null;
@@ -114,7 +114,7 @@ export function useMoveData<D, E extends Element = Element>({
             },
           }
         : {},
-    [toData, onMoveStart, onMove, onMoveEnd]
+    [toData, onMoveStart, onMove, onMoveEnd],
   );
 
   state.current.data = data;

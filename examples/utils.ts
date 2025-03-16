@@ -1,6 +1,6 @@
 export const toContentPoint = (
   { x, y }: { x: number; y: number },
-  element: SVGGraphicsElement
+  element: SVGGraphicsElement,
 ): DOMPoint => {
   const ctm = element.getScreenCTM();
   if (!ctm) throw new Error('Not found client CTM');

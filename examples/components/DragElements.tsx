@@ -1,27 +1,27 @@
-import React from 'react';
-
 interface DragContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   width?: number;
   height?: number;
 }
 
-export const DragContainer: React.FC<DragContainerProps> = ({
+export function DragContainer({
   width = 500,
   height = 300,
   style,
   ...props
-}) => (
-  <div
-    style={{
-      boxSizing: 'border-box',
-      position: 'relative',
-      width: `${width}px`,
-      height: `${height}px`,
-      ...style,
-    }}
-    {...props}
-  />
-);
+}: DragContainerProps): React.ReactElement {
+  return (
+    <div
+      style={{
+        boxSizing: 'border-box',
+        position: 'relative',
+        width: `${String(width)}px`,
+        height: `${String(height)}px`,
+        ...style,
+      }}
+      {...props}
+    />
+  );
+}
 
 interface DragItemProps extends React.HTMLAttributes<HTMLDivElement> {
   x?: number;
@@ -30,27 +30,29 @@ interface DragItemProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: number;
 }
 
-export const DragItem: React.FC<DragItemProps> = ({
+export function DragItem({
   x = 0,
   y = 0,
   width = 50,
   height = 50,
   style,
   ...props
-}) => (
-  <div
-    style={{
-      boxSizing: 'border-box',
-      position: 'absolute',
-      width: `${width}px`,
-      height: `${height}px`,
-      top: `${y}px`,
-      left: `${x}px`,
-      backgroundColor: 'white',
-      borderWidth: '1px',
-      borderStyle: 'solid',
-      ...style,
-    }}
-    {...props}
-  />
-);
+}: DragItemProps): React.ReactElement {
+  return (
+    <div
+      style={{
+        boxSizing: 'border-box',
+        position: 'absolute',
+        width: `${String(width)}px`,
+        height: `${String(height)}px`,
+        top: `${String(y)}px`,
+        left: `${String(x)}px`,
+        backgroundColor: 'white',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        ...style,
+      }}
+      {...props}
+    />
+  );
+}

@@ -25,7 +25,7 @@
     "lint-fix:prettier": "prettier --write .",
     "lint-fix:prettier-package-json": "prettier-package-json --write",
     "lint-fix:tsc": "npm run lint:tsc",
-    "prepare": "husky install",
+    "prepare": "husky",
     "prepublishOnly": "npm run build",
     "test": "vitest run"
   },

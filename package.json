@@ -13,7 +13,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc -p tsconfig.build.json",
-    "dev": "parcel serve --dist-dir .gh-pages 'examples/index.html'",
+    "dev": "vite",
     "fix": "npm-run-all -p fix:** -s prettier:fix",
     "fix:eslint": "npm run lint:eslint -- --fix",
     "fix:package-json": "prettier-package-json --write",

@@ -1,3 +1,5 @@
+import { afterAll, beforeAll, vi } from 'vitest';
+
 // cf. https://github.com/testing-library/dom-testing-library/issues/558
 
 const pointerEventCtorProps = ['pointerId', 'pageX', 'pageY'] as const;
@@ -19,8 +21,8 @@ export function supportPointerEvent(): void {
   beforeAll(() => {
     // @ts-expect-error: Create mock PointerEvent class
     global.PointerEvent = FakePointerEvent;
-    HTMLElement.prototype.setPointerCapture = jest.fn().mockImplementation(() => {});
-    HTMLElement.prototype.releasePointerCapture = jest.fn().mockImplementation(() => {});
+    HTMLElement.prototype.setPointerCapture = vi.fn().mockImplementation(() => {});
+    HTMLElement.prototype.releasePointerCapture = vi.fn().mockImplementation(() => {});
   });
 
   afterAll(() => {

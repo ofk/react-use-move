@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
-import { fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { useMove } from '../src/useMove';
 import { supportPointerEvent } from './supportPointerEvent';
@@ -45,6 +46,7 @@ const createResults = () => {
 };
 
 describe('useMove with move and click options', () => {
+  afterEach(cleanup);
   supportPointerEvent();
 
   const createMoveTest = () => {
@@ -59,7 +61,7 @@ describe('useMove with move and click options', () => {
         clickTolerance={3}
       >
         drag click
-      </MoveTest>
+      </MoveTest>,
     ).getByTestId(MOVE_TEST_TESTID);
     return { el, results, addResult, clearResults };
   };
@@ -184,6 +186,7 @@ describe('useMove with move and click options', () => {
 });
 
 describe('useMove with move options', () => {
+  afterEach(cleanup);
   supportPointerEvent();
 
   const createMoveTest = () => {
@@ -195,7 +198,7 @@ describe('useMove with move options', () => {
         onMoveEnd={addResult('end')}
       >
         drag
-      </MoveTest>
+      </MoveTest>,
     ).getByTestId(MOVE_TEST_TESTID);
     return { el, results, addResult, clearResults };
   };
@@ -250,6 +253,7 @@ describe('useMove with move options', () => {
 });
 
 describe('useMove with click options', () => {
+  afterEach(cleanup);
   supportPointerEvent();
 
   const createMoveTest = () => {
@@ -257,7 +261,7 @@ describe('useMove with click options', () => {
     const el = render(
       <MoveTest onPureClick={addResult('click', false)} clickTolerance={3}>
         click
-      </MoveTest>
+      </MoveTest>,
     ).getByTestId(MOVE_TEST_TESTID);
     return { el, results, addResult, clearResults };
   };
@@ -293,6 +297,7 @@ describe('useMove with click options', () => {
 });
 
 describe('useMove with move and pure move options', () => {
+  afterEach(cleanup);
   supportPointerEvent();
 
   const createMoveTest = () => {
@@ -309,7 +314,7 @@ describe('useMove with move and pure move options', () => {
         onTraceMoveCapture={addResult('trace-cap', false)}
       >
         drag
-      </MoveTest>
+      </MoveTest>,
     ).getByTestId(MOVE_TEST_TESTID);
     return { el, results, addResult, clearResults };
   };
@@ -367,6 +372,7 @@ describe('useMove with move and pure move options', () => {
 });
 
 describe('useMove with move options wrap movable parent', () => {
+  afterEach(cleanup);
   supportPointerEvent();
 
   const createMoveTest = () => {
@@ -389,7 +395,7 @@ describe('useMove with move options wrap movable parent', () => {
         >
           drag click
         </MoveTest>
-      </MoveTest>
+      </MoveTest>,
     ).getByTestId(MOVE_TEST_TESTID);
     return { el, results, addResult, clearResults };
   };
@@ -445,6 +451,7 @@ describe('useMove with move options wrap movable parent', () => {
 });
 
 describe('useMove with no options wrap movable parent', () => {
+  afterEach(cleanup);
   supportPointerEvent();
 
   const createMoveTest = () => {
@@ -458,7 +465,7 @@ describe('useMove with no options wrap movable parent', () => {
         onPureClick={addResult('parent-click', false)}
       >
         <MoveTest>void</MoveTest>
-      </MoveTest>
+      </MoveTest>,
     ).getByTestId(MOVE_TEST_TESTID);
     return { el, results, addResult, clearResults };
   };

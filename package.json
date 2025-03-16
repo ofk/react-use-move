@@ -23,7 +23,7 @@
     "lint:tsc": "tsc",
     "prepare": "husky install",
     "prepublishOnly": "npm run build",
-    "test": "jest",
+    "test": "vitest run",
     "prettier:fix": "npm run prettier:lint -- --write",
     "prettier:lint": "prettier . --check"
   },

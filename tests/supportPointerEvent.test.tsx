@@ -1,9 +1,12 @@
-import { fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { supportPointerEvent } from './supportPointerEvent';
 
 describe('supportPointerEvent', () => {
+  afterEach(cleanup);
+
   supportPointerEvent();
 
   it('responds to pointer events', () => {
@@ -31,7 +34,7 @@ describe('supportPointerEvent', () => {
         data-testid={POINTER_EVENT_TEST_TESTID}
       >
         pointer event
-      </div>
+      </div>,
     ).getByTestId(POINTER_EVENT_TEST_TESTID);
 
     fireEvent.pointerDown(el, { pointerId: 1, screenX: 10, screenY: 40 });

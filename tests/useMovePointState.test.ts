@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import type { MovePointStateOptions } from '../src/useMovePointState';
 import { useMovePointState } from '../src/useMovePointState';
 import { MoveDataGenerator } from './MoveDataGenerator';
 
 describe('useMovePointState', () => {
+  afterEach(cleanup);
+
   it('can move with default value', () => {
     const { result } = renderHook(() => useMovePointState());
     expect(result.current.x).toEqual(0);
@@ -17,7 +20,7 @@ describe('useMovePointState', () => {
     act(() => {
       moveOptions.onMoveStart!(
         { type: 'pointerdown', stopPropagation() {} } as any,
-        moveData.get()
+        moveData.get(),
       );
     });
     expect(result.current.x).toEqual(0);
@@ -66,7 +69,7 @@ describe('useMovePointState', () => {
         minY: 0,
         maxX: 30,
         maxY: 30,
-      })
+      }),
     );
     expect(result.current.x).toEqual(10);
     expect(result.current.y).toEqual(20);
@@ -76,7 +79,7 @@ describe('useMovePointState', () => {
     act(() => {
       moveOptions.onMoveStart!(
         { type: 'pointerdown', stopPropagation() {} } as any,
-        moveData.get()
+        moveData.get(),
       );
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());
     });
@@ -137,7 +140,7 @@ describe('useMovePointState', () => {
           return { x: x - (x % 5), y: y - (y % 5) };
         },
         onChange,
-      })
+      }),
     );
     expect(result.current.x).toEqual(0);
     expect(result.current.y).toEqual(0);
@@ -147,7 +150,7 @@ describe('useMovePointState', () => {
     act(() => {
       moveOptions.onMoveStart!(
         { type: 'pointerdown', stopPropagation() {} } as any,
-        moveData.get()
+        moveData.get(),
       );
       moveOptions.onMove!({ type: 'pointermove' } as any, moveData.get());
     });

@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook } from '@testing-library/react';
 import { useState } from 'react';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { useMoveData } from '../src/useMoveData';
 import { MoveDataGenerator } from './MoveDataGenerator';
 
 describe('useMoveData', () => {
+  afterEach(cleanup);
+
   it('can move with point', () => {
     const { result } = renderHook(() => {
       const [state, setState] = useState({ x: 0, y: 0, moving: false });
@@ -36,7 +39,7 @@ describe('useMoveData', () => {
     act(() => {
       moveOptions.onMoveStart!(
         { type: 'pointerdown', stopPropagation() {} } as any,
-        moveData.get()
+        moveData.get(),
       );
     });
     expect(result.current.x).toEqual(0);

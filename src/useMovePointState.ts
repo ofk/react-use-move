@@ -79,6 +79,7 @@ export function useMovePointState<E extends Element = Element>({
     },
     [minX, minY, maxX, maxY, customClampPoint],
   );
+
   const setPoint = useCallback<MovePointStateResult<E>['setPoint']>(
     (actionOrValue) => {
       setRawPoint((prevPoint) =>

@@ -1,5 +1,8 @@
 # react-use-move
 
+[![npm](https://img.shields.io/npm/v/react-use-move)](https://npmjs.com/package/react-use-move)
+![ci](https://github.com/ofk/react-use-move/actions/workflows/ci.yml/badge.svg)
+
 React hook for move interaction by pointer event.
 
 ## Install

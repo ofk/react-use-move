@@ -22,7 +22,6 @@
     "dist"
   ],
   "scripts": {
-    "prebuild": "rimraf dist",
     "build": "tsup",
     "dev": "vite",
     "lint": "run-s lint:**",

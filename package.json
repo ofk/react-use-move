@@ -3,8 +3,11 @@
   "version": "1.4.0",
   "description": "React hook for move interaction by pointer event",
   "license": "MIT",
-  "author": "ofk <ofkjpn+npm@gmail.com> (https://github.com/ofk/)",
-  "repository": "ofk/react-use-move",
+  "author": "ofk (https://github.com/ofk/)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofk/react-use-move.git"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -38,6 +41,7 @@
     "prepublishOnly": "npm run build",
     "test": "vitest run"
   },
+  "sideEffects": false,
   "peerDependencies": {
     "react": ">=17"
   },

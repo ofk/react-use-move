@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "vite",
-    "lint": "run-s lint:**",
+    "lint": "run-p lint:**",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check .",
     "lint:prettier-package-json": "prettier-package-json --list-different",
@@ -36,7 +36,7 @@
     "lint-fix:eslint": "eslint --fix .",
     "lint-fix:prettier": "prettier --write .",
     "lint-fix:prettier-package-json": "prettier-package-json --write",
-    "lint-fix:tsc": "npm run lint:tsc",
+    "lint-fix:tsc": "run-s lint:tsc",
     "prepare": "husky",
     "prepublishOnly": "npm run build",
     "test": "vitest run"
@@ -70,10 +70,10 @@
   "lint-staged": {
     "package.json": [
       "prettier --write",
-      "prettier-package-json --write"
+      "npm run lint-fix:prettier-package-json"
     ],
-    "*.{js,jsx,mjs,cjs,json,md,html}": "prettier --write",
-    "*.{ts,tsx,mts,cts}": [
+    "*.{json,md,html}": "prettier --write",
+    "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": [
       "prettier --write",
       "eslint --fix"
     ]
